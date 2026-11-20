@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import type { Prodotto } from "@/data/demo";
 
 // Carrello di prova.
-// I preordini non si uniscono ad altri prodotti, e tra loro solo se hanno la stessa data.
+// Preordini e riscatti app non si uniscono ad altri prodotti.
+// I preordini tra loro solo se hanno la stessa data.
 
 type Cart = { righe: Prodotto[] };
 
@@ -26,12 +27,13 @@ export function motivoBlocco(righe: Prodotto[], p: Prodotto): string | null {
   if (p.stato === "soldout") return "Prodotto sold out.";
   const primo = righe[0];
   if (!primo) return null;
-  const preNelCarrello = primo.stato === "preordine";
-  const preNuovo = p.stato === "preordine";
-  if (preNelCarrello !== preNuovo) {
-    return preNuovo ? "I preordini vanno in un ordine a parte." : "Hai un preordine nel carrello: questo va in un ordine a parte.";
+  if (primo.stato !== p.stato) {
+    if (p.stato === "preordine") return "I preordini vanno in un ordine a parte.";
+    if (p.stato === "riscatto") return "I riscatti app vanno in un ordine a parte.";
+    if (primo.stato === "preordine") return "Hai un preordine nel carrello: questo va in un ordine a parte.";
+    return "Hai un riscatto app nel carrello: questo va in un ordine a parte.";
   }
-  if (preNuovo && primo.uscita !== p.uscita) {
+  if (p.stato === "preordine" && primo.uscita !== p.uscita) {
     return `Puoi unire solo preordini con la stessa data (${primo.uscita}).`;
   }
   return null;

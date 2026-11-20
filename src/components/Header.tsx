@@ -10,7 +10,7 @@ import { useCart } from "./CartProvider";
 const links = [
   { href: "/catalogo", label: "Catalogo" },
   { href: "/preordini", label: "Preordini" },
-  { href: "/riscatto", label: "Riscatto codici" },
+  { href: "/riscatti", label: "Riscatti app" },
   { href: "/recensioni", label: "Recensioni" },
   { href: "/faq", label: "FAQ" },
 ];

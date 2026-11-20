@@ -1,23 +1,29 @@
 // Dati di prova. Poi arriveranno dal Google Sheet.
 
-export type Stato = "ordinazione" | "preordine" | "soldout";
+export type Stato = "ordinazione" | "preordine" | "riscatto" | "soldout";
 
 export type Prodotto = {
   codice: string;
   nome: string;
-  categoria: "Arene" | "Beyblade" | "Accessori";
+  categoria: "Arene" | "Beyblade" | "Accessori" | "Premi";
   prezzo: number;
   stato: Stato;
   uscita?: string; // gg/mm, solo preordini
 };
 
 export const ACCONTO_PREORDINE = 0.4;
-export const RISCATTO_CODICE = 35;
 
 export const preordini: Prodotto[] = [
   { codice: "BX-54", nome: "Sieg Superion 0-70LP", categoria: "Beyblade", prezzo: 35, stato: "preordine", uscita: "12/12" },
   { codice: "CX-20", nome: "Customize Set C", categoria: "Beyblade", prezzo: 100, stato: "preordine", uscita: "12/12" },
   { codice: "BX-56", nome: "String Launcher L White × Violet", categoria: "Accessori", prezzo: 25, stato: "preordine", uscita: "19/12" },
+];
+
+// Premi da riscattare con il codice dell'app. Cambiano ogni mese.
+export const riscatti: Prodotto[] = [
+  { codice: "PREMIO 1", nome: "Premio di novembre 1", categoria: "Premi", prezzo: 35, stato: "riscatto" },
+  { codice: "PREMIO 2", nome: "Premio di novembre 2", categoria: "Premi", prezzo: 35, stato: "riscatto" },
+  { codice: "PREMIO 3", nome: "Premio di novembre 3", categoria: "Premi", prezzo: 35, stato: "riscatto" },
 ];
 
 export const catalogo: Prodotto[] = [
@@ -41,5 +47,5 @@ export const faq: { domanda: string; risposta: string }[] = [
   { domanda: "Come pago?", risposta: "Su WhatsApp, dopo l'ordine. Con PayPal, Revolut o bonifico." },
   { domanda: "Sono originali?", risposta: "Sì, solo Beyblade X originali Takara Tomy." },
   { domanda: "Come funziona il preordine?", risposta: "Si ordina da solo, senza altri prodotti. Paghi il 40% subito e il resto quando arriva." },
-  { domanda: "Come funziona il riscatto codici?", risposta: "Ci mandi i codici, li riscattiamo in Giappone e ti mandiamo i premi. € 35 a codice." },
+  { domanda: "Come funzionano i riscatti app?", risposta: "Ogni mese ci sono premi nuovi da riscattare con il codice dell'app Beyblade X. Scegli il premio e quando ordini inserisci il codice. Si ordinano da soli, senza altri prodotti." },
 ];

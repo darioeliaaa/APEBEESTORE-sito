@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { RISCATTO_CODICE } from "@/data/demo";
-import { euro } from "@/lib/format";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
 export function DemoBanner() {
@@ -91,31 +89,6 @@ export function Passi({ lista }: { lista: { titolo: string; testo: string }[] })
   );
 }
 
-export function RiscattoBox() {
-  return (
-    <section className="redeem">
-      <div className="wrap">
-        <div className="col">
-          <span className="label">Riscatto codici</span>
-          <h2>
-            Hai dei codici premio? <span>Li riscattiamo noi.</span>
-          </h2>
-          <p>Mandaci i codici delle confezioni: li riscattiamo in Giappone e ti mandiamo i premi.</p>
-        </div>
-        <div className="ticket">
-          <span className="label">A codice</span>
-          <span className="big">{euro(RISCATTO_CODICE).replace(",00", "")}</span>
-          <ol>
-            <li>Aggiungi il riscatto al carrello</li>
-            <li>Scrivi codice e premio</li>
-            <li>Ricevi il premio con l&apos;ordine</li>
-          </ol>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export function Community() {
   return (
     <section className="community" id="community">
@@ -149,7 +122,7 @@ export function Footer() {
           <ul>
             <li><Link href="/catalogo">Catalogo</Link></li>
             <li><Link href="/preordini">Preordini</Link></li>
-            <li><Link href="/riscatto">Riscatto codici</Link></li>
+            <li><Link href="/riscatti">Riscatti app</Link></li>
           </ul>
         </div>
         <div>

@@ -7,6 +7,7 @@ import { useCart } from "./CartProvider";
 const badge = {
   ordinazione: { cls: "badge--order", testo: () => "Su ordinazione" },
   preordine: { cls: "badge--pre", testo: (p: Prodotto) => `Preordine · ${p.uscita}` },
+  riscatto: { cls: "badge--redeem", testo: () => "Riscatto app" },
   soldout: { cls: "badge--sold", testo: () => "Sold out" },
 };
 
@@ -15,6 +16,7 @@ export function ProductCard({ p }: { p: Prodotto }) {
   const b = badge[p.stato];
   const sold = p.stato === "soldout";
   const pre = p.stato === "preordine";
+  const ris = p.stato === "riscatto";
 
   return (
     <article className={`card${sold ? " sold" : ""}`}>
@@ -34,12 +36,13 @@ export function ProductCard({ p }: { p: Prodotto }) {
             Sold out
           </button>
         ) : (
-          <button className={`btn btn--sm ${pre ? "btn--dark" : "btn--primary"}`} type="button" onClick={() => add(p)}>
-            {pre ? "Preordina" : "Aggiungi"}
+          <button className={`btn btn--sm ${pre || ris ? "btn--dark" : "btn--primary"}`} type="button" onClick={() => add(p)}>
+            {pre ? "Preordina" : ris ? "Riscatta" : "Aggiungi"}
           </button>
         )}
       </div>
       {pre && <span className="incl">Acconto {euro(acconto(p.prezzo, ACCONTO_PREORDINE))}</span>}
+      {ris && <span className="incl">Serve il codice dell&apos;app</span>}
     </article>
   );
 }

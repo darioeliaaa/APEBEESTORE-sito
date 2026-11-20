@@ -19,7 +19,7 @@ export default function Home() {
           <div className="tiles">
             <Tile href="/catalogo" label="Su ordinazione" titolo="Catalogo" testo="Tutti i Beyblade X, arene e accessori." />
             <Tile href="/preordini" label="Nuove uscite" titolo="Preordini" testo="Prenota le nuove uscite con un acconto del 40%." />
-            <Tile href="/riscatto" label="€ 35 a codice" titolo="Riscatto codici" testo="Hai dei codici premio? Li riscattiamo noi." />
+            <Tile href="/riscatti" label="Cambiano ogni mese" titolo="Riscatti app" testo="Riscatta i premi con il codice dell'app Beyblade X." />
             <Tile href="/recensioni" label="I nostri clienti" titolo="Recensioni" testo="Cosa dicono di noi i blader." />
           </div>
         </div>
