@@ -1,0 +1,24 @@
+# dipendenze
+/node_modules
+
+# build di Next.js
+/.next/
+/out/
+/build
+
+# varie
+.DS_Store
+*.pem
+npm-debug.log*
+
+# variabili d'ambiente (mai su GitHub)
+.env*
+
+# vercel
+.vercel
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IntelliJ
+.idea
