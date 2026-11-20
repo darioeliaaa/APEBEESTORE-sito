@@ -1,6 +1,6 @@
 # APEBEESTORE
 
-Sito di APEBEESTORE. Per ora c'è solo la home di prova, con prodotti e prezzi non reali.
+Sito di APEBEESTORE. Per ora ci sono la home e le pagine di prova, con prodotti e prezzi non reali.
 
 Next.js, React, TypeScript, Tailwind.
 

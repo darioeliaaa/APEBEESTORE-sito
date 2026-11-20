@@ -20,7 +20,7 @@ export const preordini: Prodotto[] = [
   { codice: "BX-56", nome: "String Launcher L White × Violet", categoria: "Accessori", prezzo: 25, stato: "preordine", uscita: "19/12" },
 ];
 
-export const inEvidenza: Prodotto[] = [
+export const catalogo: Prodotto[] = [
   { codice: "BX-46", nome: "Stadium Infinity", categoria: "Arene", prezzo: 122, stato: "ordinazione" },
   { codice: "UX-17", nome: "Meteor Dragoon 3-70J", categoria: "Beyblade", prezzo: 33, stato: "ordinazione" },
   { codice: "CX-13", nome: "Bahamut Blitz BK1-50I", categoria: "Beyblade", prezzo: 34, stato: "ordinazione" },
@@ -29,6 +29,10 @@ export const inEvidenza: Prodotto[] = [
   { codice: "CX-11", nome: "Emperor Might Deck Set", categoria: "Beyblade", prezzo: 105, stato: "soldout" },
   { codice: "BX-25", nome: "Gear Case", categoria: "Accessori", prezzo: 39, stato: "ordinazione" },
   { codice: "BX-51", nome: "String Launcher nero / verde", categoria: "Accessori", prezzo: 34, stato: "ordinazione" },
+  { codice: "BX-10", nome: "Xtreme Stadium", categoria: "Arene", prezzo: 58, stato: "ordinazione" },
+  { codice: "UX-01", nome: "Dran Buster 1-60A", categoria: "Beyblade", prezzo: 29, stato: "ordinazione" },
+  { codice: "BX-01", nome: "Dran Sword 3-60F", categoria: "Beyblade", prezzo: 28, stato: "soldout" },
+  { codice: "BX-11", nome: "Launcher Grip", categoria: "Accessori", prezzo: 18, stato: "ordinazione" },
 ];
 
 export const faq: { domanda: string; risposta: string }[] = [
