@@ -44,10 +44,10 @@ export function Hero() {
   );
 }
 
-export function PageHead({ label, titolo, testo }: { label: string; titolo: string; testo?: string }) {
+export function PageHead({ label, titolo, testo, stretto }: { label: string; titolo: string; testo?: string; stretto?: boolean }) {
   return (
     <section className="page-head">
-      <div className="wrap">
+      <div className={stretto ? "wrap narrow" : "wrap"}>
         <span className="label">{label}</span>
         <h1>{titolo}</h1>
         {testo && <p>{testo}</p>}
@@ -86,7 +86,7 @@ export function Community() {
           <h2>Entra nella community</h2>
           <p>Più di 200 blader. Nuove uscite, preordini e tornei li annunciamo prima lì.</p>
         </div>
-        <a className="btn" href="#">
+        <a className="btn" href="https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue" target="_blank" rel="noopener noreferrer">
           Entra
         </a>
       </div>
@@ -116,7 +116,8 @@ export function Footer() {
         <div>
           <h3>Info</h3>
           <ul>
-            <li><Link href="/come-ordinare">Come ordinare</Link></li>
+            <li><Link href="/chi-siamo">Chi siamo</Link></li>
+            <li><Link href="/faq#come-ordinare">Come ordinare</Link></li>
             <li><Link href="/recensioni">Recensioni</Link></li>
             <li><Link href="/faq">FAQ</Link></li>
           </ul>
@@ -125,8 +126,8 @@ export function Footer() {
           <h3>Contatti</h3>
           <ul>
             <li><a href="#">WhatsApp</a></li>
-            <li><a href="https://www.instagram.com/apebeestore/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
-            <li><a href="#">Community</a></li>
+            <li><a href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+            <li><a href="https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue" target="_blank" rel="noopener noreferrer">Community</a></li>
           </ul>
         </div>
         <div className="legal">

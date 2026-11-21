@@ -7,12 +7,16 @@ import { useEffect, useState } from "react";
 import { Menu, Search, ShoppingBag, SunMoon, X } from "lucide-react";
 import { useCart } from "./CartProvider";
 
-const links = [
+const negozio = [
   { href: "/catalogo", label: "Catalogo" },
   { href: "/preordini", label: "Preordini" },
   { href: "/riscatti", label: "Riscatti app" },
   { href: "/recensioni", label: "Recensioni" },
+];
+
+const info = [
   { href: "/faq", label: "FAQ" },
+  { href: "/chi-siamo", label: "Chi siamo" },
 ];
 
 function toggleTheme() {
@@ -40,8 +44,14 @@ export function Header() {
           <Image className="logo-white" src="/brand/logo-orizzontale.png" alt="APEBEESTORE" width={736} height={188} priority />
         </Link>
         <nav className={`nav${aperto ? " open" : ""}`} id="menu" aria-label="Menu principale">
-          {links.map((l) => (
+          {negozio.map((l) => (
             <Link key={l.href} href={l.href} aria-current={pathname === l.href ? "page" : undefined}>
+              {l.label}
+            </Link>
+          ))}
+          <span className="nav-label">Info</span>
+          {info.map((l) => (
+            <Link key={l.href} className="nav-info" href={l.href} aria-current={pathname === l.href ? "page" : undefined}>
               {l.label}
             </Link>
           ))}

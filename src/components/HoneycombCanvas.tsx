@@ -21,10 +21,15 @@ export function HoneycombCanvas() {
       const s = 26;
       const w = Math.sqrt(3) * s;
       const h = 1.5 * s;
-      for (let row = -1; row * h < r.height + s; row++) {
-        for (let col = -1; col * w < r.width + w; col++) {
-          const cx = col * w + (row % 2 ? w / 2 : 0);
-          const cy = row * h;
+      // griglia centrata: un esagono sta esattamente al centro, dietro l'ape
+      const mx = r.width / 2;
+      const my = r.height / 2;
+      const righe = Math.ceil(my / h) + 1;
+      const colonne = Math.ceil(mx / w) + 1;
+      for (let row = -righe; row <= righe; row++) {
+        for (let col = -colonne; col <= colonne; col++) {
+          const cx = mx + col * w + (Math.abs(row) % 2 ? w / 2 : 0);
+          const cy = my + row * h;
           x.beginPath();
           for (let i = 0; i < 6; i++) {
             const a = (Math.PI / 3) * i + Math.PI / 6;

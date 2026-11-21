@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
-import { PageHead, Passi } from "@/components/Sections";
+import { PageHead } from "@/components/Sections";
 import { riscatti } from "@/data/demo";
 
 export const metadata: Metadata = { title: "Riscatti app" };
-
-const comeFunziona = [
-  { titolo: "Scegli", testo: "Scegli il premio di questo mese." },
-  { titolo: "Codice", testo: "Quando ordini inserisci il codice dell'app Beyblade X." },
-  { titolo: "Ricevi", testo: "Ti mandiamo il premio a casa." },
-];
 
 export default function Riscatti() {
   return (
@@ -30,17 +25,13 @@ export default function Riscatti() {
               <ProductCard key={p.codice} p={p} />
             ))}
           </div>
-        </div>
-      </section>
-      <section className="block raised">
-        <div className="wrap">
-          <div className="sec-head">
-            <div>
-              <span className="label">Come funziona</span>
-              <h2>Il riscatto</h2>
-            </div>
-          </div>
-          <Passi lista={comeFunziona} />
+          <Link className="info-link" href="/faq#riscatti-app">
+            <span>
+              <strong>Come funziona il riscatto</strong>
+              Scegli il premio, inserisci il codice dell&apos;app quando ordini, ti arriva a casa.
+            </span>
+            <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </section>
     </>

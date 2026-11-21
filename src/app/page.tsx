@@ -27,23 +27,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="numbers">
-        <div className="wrap">
-          <div>
-            <strong>900+</strong>
-            <span className="label">Pezzi venduti</span>
-          </div>
-          <div>
-            <strong>200+</strong>
-            <span className="label">Blader nella community</span>
-          </div>
-          <div>
-            <strong>100%</strong>
-            <span className="label">Originali</span>
-          </div>
-        </div>
-      </section>
-
       <Community />
     </>
   );

@@ -9,7 +9,7 @@ export default function Recensioni() {
       <PageHead label="I nostri clienti" titolo="Recensioni" testo="Alcuni messaggi dei blader che hanno ordinato da noi." />
       <section className="block block--top">
         <div className="wrap">
-          <div className="grid">
+          <div className="shots">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <div className="shot" key={n}>
                 Recensione
@@ -17,7 +17,7 @@ export default function Recensioni() {
             ))}
           </div>
           <div>
-            <a className="btn btn--ghost" href="https://www.instagram.com/apebeestore/" target="_blank" rel="noopener noreferrer">
+            <a className="btn btn--ghost" href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">
               Altre su Instagram
             </a>
           </div>
