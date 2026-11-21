@@ -1,29 +1,12 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
-import { Community, Hero, Tile } from "@/components/Sections";
+import { Community, Hero } from "@/components/Sections";
 import { catalogo } from "@/data/demo";
 
 export default function Home() {
   return (
     <>
       <Hero />
-
-      <section className="block">
-        <div className="wrap">
-          <div className="sec-head">
-            <div>
-              <span className="label">Il negozio</span>
-              <h2>Cosa trovi</h2>
-            </div>
-          </div>
-          <div className="tiles">
-            <Tile href="/catalogo" label="Su ordinazione" titolo="Catalogo" testo="Tutti i Beyblade X, arene e accessori." />
-            <Tile href="/preordini" label="Nuove uscite" titolo="Preordini" testo="Prenota le nuove uscite con un acconto del 40%." />
-            <Tile href="/riscatti" label="Cambiano ogni mese" titolo="Riscatti app" testo="Riscatta i premi con il codice dell'app Beyblade X." />
-            <Tile href="/recensioni" label="I nostri clienti" titolo="Recensioni" testo="Cosa dicono di noi i blader." />
-          </div>
-        </div>
-      </section>
 
       <section className="block raised">
         <div className="wrap">
@@ -36,8 +19,8 @@ export default function Home() {
               Vedi tutto
             </Link>
           </div>
-          <div className="grid grid--3">
-            {catalogo.slice(0, 3).map((p) => (
+          <div className="grid">
+            {catalogo.slice(0, 4).map((p) => (
               <ProductCard key={p.codice} p={p} />
             ))}
           </div>

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
 export function DemoBanner() {
@@ -54,17 +53,6 @@ export function PageHead({ label, titolo, testo }: { label: string; titolo: stri
         {testo && <p>{testo}</p>}
       </div>
     </section>
-  );
-}
-
-export function Tile({ href, label, titolo, testo }: { href: string; label: string; titolo: string; testo: string }) {
-  return (
-    <Link className="tile" href={href}>
-      <span className="label">{label}</span>
-      <h3>{titolo}</h3>
-      <p>{testo}</p>
-      <ArrowRight className="arrow" size={28} strokeWidth={2.5} aria-hidden="true" />
-    </Link>
   );
 }
 
