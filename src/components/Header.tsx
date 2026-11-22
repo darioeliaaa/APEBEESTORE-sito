@@ -31,7 +31,7 @@ function toggleTheme() {
 }
 
 export function Header() {
-  const { count, clear } = useCart();
+  const { count, apri } = useCart();
   const pathname = usePathname();
   const [aperto, setAperto] = useState(false);
 
@@ -66,7 +66,7 @@ export function Header() {
           <button className="icon-btn" type="button" aria-label="Cerca">
             <Search size={22} strokeWidth={2} />
           </button>
-          <button className="icon-btn" type="button" aria-label={`Carrello, ${count} prodotti`} onClick={clear}>
+          <button className="icon-btn" type="button" aria-label={`Carrello, ${count} prodotti`} onClick={apri}>
             <ShoppingBag size={22} strokeWidth={2} />
             {count > 0 && <span className="count">{count}</span>}
           </button>

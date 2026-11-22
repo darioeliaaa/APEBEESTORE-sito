@@ -5,7 +5,19 @@ import { ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import type { Prodotto } from "@/data/demo";
 import { ProductCard } from "./ProductCard";
 
-const categorie = ["Beyblade", "Arene", "Accessori"] as const;
+// le linee e le categorie si creano da sole dai prodotti:
+// una linea o una categoria nuova nel foglio compare qui senza toccare il codice
+function albero(prodotti: Prodotto[]) {
+  const linee = new Map<string, string[]>();
+  for (const p of prodotti) {
+    const cat = linee.get(p.linea) ?? [];
+    if (!cat.includes(p.categoria)) cat.push(p.categoria);
+    linee.set(p.linea, cat);
+  }
+  return [...linee].map(([linea, categorie]) => ({ linea, categorie }));
+}
+
+const chiave = (linea: string, categoria: string) => `${linea}/${categoria}`;
 
 const ordini = [
   { id: "consigliati", label: "Consigliati" },
@@ -51,7 +63,7 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
 
   const f = fasce.find((x) => x.id === fascia)!;
   const lista = prodotti
-    .filter((p) => scelte.length === 0 || scelte.includes(p.categoria))
+    .filter((p) => scelte.length === 0 || scelte.includes(chiave(p.linea, p.categoria)))
     .filter((p) => !noSoldOut || p.stato !== "soldout")
     .filter((p) => (f.min === 0 || p.prezzo > f.min) && p.prezzo <= f.max)
     .sort((a, b) => {
@@ -61,9 +73,15 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
       return 0;
     });
 
-  const nFiltri = scelte.length + (noSoldOut ? 1 : 0);
+  const nFiltri = (scelte.length ? 1 : 0) + (noSoldOut ? 1 : 0);
   const nOrdina = (ordine !== "consigliati" ? 1 : 0) + (fascia !== "tutte" ? 1 : 0);
+  const linee = albero(prodotti);
   const cambia = (c: string) => setScelte((s) => (s.includes(c) ? s.filter((x) => x !== c) : [...s, c]));
+  const cambiaLinea = (linea: string, categorie: string[]) => {
+    const tutte = categorie.map((c) => chiave(linea, c));
+    const piena = tutte.every((k) => scelte.includes(k));
+    setScelte((s) => (piena ? s.filter((k) => !tutte.includes(k)) : [...new Set([...s, ...tutte])]));
+  };
   const azzeraFiltri = () => {
     setScelte([]);
     setNoSoldOut(false);
@@ -106,16 +124,28 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
         {aperto === "filtri" && (
           <div className="pop pop--left" id="pannello-filtri" role="dialog" aria-label="Filtri">
             <fieldset>
-              <legend>Categoria</legend>
+              <legend>Categorie</legend>
               <label className="opt">
                 <input type="checkbox" checked={scelte.length === 0} onChange={() => setScelte([])} />
-                Tutti
+                Tutto
               </label>
-              {categorie.map((c) => (
-                <label className="opt" key={c}>
-                  <input type="checkbox" checked={scelte.includes(c)} onChange={() => cambia(c)} />
-                  {c}
-                </label>
+              {linee.map(({ linea, categorie }) => (
+                <div className="linea" key={linea}>
+                  <label className="opt opt--linea">
+                    <input
+                      type="checkbox"
+                      checked={categorie.every((c) => scelte.includes(chiave(linea, c)))}
+                      onChange={() => cambiaLinea(linea, categorie)}
+                    />
+                    {linea}
+                  </label>
+                  {categorie.map((c) => (
+                    <label className="opt opt--sub" key={c}>
+                      <input type="checkbox" checked={scelte.includes(chiave(linea, c))} onChange={() => cambia(chiave(linea, c))} />
+                      {c}
+                    </label>
+                  ))}
+                </div>
               ))}
             </fieldset>
             <fieldset>

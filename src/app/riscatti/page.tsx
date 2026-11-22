@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { PageHead } from "@/components/Sections";
-import { riscatti } from "@/data/demo";
+import { leggiCatalogo, perStato } from "@/lib/sheet";
 
 export const metadata: Metadata = { title: "Riscatti app" };
+export const revalidate = 300;
 
-export default function Riscatti() {
+export default async function Riscatti() {
+  const riscatti = perStato((await leggiCatalogo()).prodotti, "riscatto");
   return (
     <>
       <PageHead
@@ -20,11 +22,15 @@ export default function Riscatti() {
             <strong>Si ordinano da soli.</strong>
             <span>Non si possono unire ad altri prodotti o preordini.</span>
           </div>
-          <div className="grid grid--3">
-            {riscatti.map((p) => (
-              <ProductCard key={p.codice} p={p} />
-            ))}
-          </div>
+          {riscatti.length > 0 ? (
+            <div className="grid grid--3">
+              {riscatti.map((p) => (
+                <ProductCard key={p.codice} p={p} />
+              ))}
+            </div>
+          ) : (
+            <p className="vuoto">I premi di questo mese arrivano a breve.</p>
+          )}
           <Link className="info-link" href="/faq#riscatti-app">
             <span>
               <strong>Come funziona il riscatto</strong>

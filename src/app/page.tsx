@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { Community, Hero } from "@/components/Sections";
-import { catalogo } from "@/data/demo";
+import { leggiCatalogo, perStato } from "@/lib/sheet";
 
-export default function Home() {
+export const revalidate = 300;
+
+export default async function Home() {
+  const inEvidenza = perStato((await leggiCatalogo()).prodotti, "ordinazione").slice(0, 4);
   return (
     <>
       <Hero />
@@ -20,7 +23,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid">
-            {catalogo.slice(0, 4).map((p) => (
+            {inEvidenza.map((p) => (
               <ProductCard key={p.codice} p={p} />
             ))}
           </div>

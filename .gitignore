@@ -13,6 +13,7 @@ npm-debug.log*
 
 # variabili d'ambiente (mai su GitHub)
 .env*
+!.env.example
 
 # vercel
 .vercel

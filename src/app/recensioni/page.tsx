@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Recensioni" };
 export default function Recensioni() {
   return (
     <>
-      <PageHead label="I nostri clienti" titolo="Recensioni" testo="Alcuni messaggi dei blader che hanno ordinato da noi." />
+      <PageHead label="I nostri clienti" titolo="Recensioni" testo="Alcuni messaggi di chi ha già ordinato da noi." />
       <section className="block block--top">
         <div className="wrap">
           <div className="shots">

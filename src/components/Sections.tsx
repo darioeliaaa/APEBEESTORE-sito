@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
-export function DemoBanner() {
+export function DemoBanner({ dalFoglio }: { dalFoglio: boolean }) {
   return (
     <div className="demo">
       <div className="wrap">
         <span>Versione di prova</span>
-        <span>Prodotti e prezzi non reali</span>
+        <span>{dalFoglio ? "Prodotti presi dal Google Sheet" : "Prodotti e prezzi non reali"}</span>
       </div>
     </div>
   );
@@ -18,11 +18,11 @@ export function Hero() {
     <section className="hero">
       <div className="wrap">
         <div className="hero-text">
-          <span className="label">Beyblade X originali Takara Tomy</span>
+          <span className="label">Originali dal Giappone</span>
           <h1>
             Bee ready <span className="hl">to spin.</span>
           </h1>
-          <p className="lead">Beyblade X originali dal Giappone. Spedizione e dogana incluse nel prezzo.</p>
+          <p className="lead">Giochi e collezionabili originali, importati dal Giappone. Spedizione e dogana incluse nel prezzo.</p>
           <div className="ctas">
             <Link className="btn btn--primary" href="/catalogo">
               Vai al catalogo
@@ -84,7 +84,7 @@ export function Community() {
         <div className="col">
           <span className="label">Community WhatsApp</span>
           <h2>Entra nella community</h2>
-          <p>Più di 200 blader. Nuove uscite, preordini e tornei li annunciamo prima lì.</p>
+          <p>Più di 200 appassionati. Nuove uscite, preordini e tornei li annunciamo prima lì.</p>
         </div>
         <a className="btn" href="https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue" target="_blank" rel="noopener noreferrer">
           Entra
