@@ -14,7 +14,7 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable
 const themeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 // la struttura comune a tutte le pagine, in italiano (src/app/(it)) e in inglese (src/app/en)
-export async function Struttura({ lang, children }: { lang: Lingua; children: React.ReactNode }) {
+export async function Struttura({ lang, nonTrovata, children }: { lang: Lingua; nonTrovata?: boolean; children: React.ReactNode }) {
   // se il foglio ha un problema l'errore lo gestisce la pagina (che resta all'ultima versione buona):
   // qui il catalogo serve solo a carrello e menu, così anche /controllo si apre lo stesso
   const catalogo = await leggiCatalogo().catch(() => null);
@@ -31,7 +31,7 @@ export async function Struttura({ lang, children }: { lang: Lingua; children: Re
       <body>
         <LinguaProvider lang={lang}>
           <CartProvider catalogo={perCarrello}>
-            <Header linee={linee} />
+            <Header linee={linee} nonTrovata={nonTrovata} />
             <main>{children}</main>
             <Footer lang={lang} />
           </CartProvider>

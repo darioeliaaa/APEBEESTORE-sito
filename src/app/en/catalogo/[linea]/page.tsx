@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { CatalogoLinea, lineePerPagine, nomeDellaLinea } from "@/pagine/Catalogo";
-import { metaPagina } from "@/pagine/meta";
+import { CatalogoLinea, lineePerPagine, metaLinea } from "@/pagine/Catalogo";
 
 type Props = { params: Promise<{ linea: string }> };
 
@@ -12,7 +11,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { linea } = await params;
-  return metaPagina("en", `/catalogo/${linea}`, await nomeDellaLinea(linea));
+  return metaLinea("en", linea);
 }
 
 export default async function Pagina({ params }: Props) {

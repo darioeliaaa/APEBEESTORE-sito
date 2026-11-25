@@ -390,6 +390,9 @@ function PrivacyIt() {
               <strong>Messaggi</strong>: quello che ci scrivi su WhatsApp o via email.
             </li>
             <li>
+              <strong>Recensioni</strong>: se ne lasci una sul sito, il nome, la città, il prodotto e il testo che scrivi.
+            </li>
+            <li>
               <strong>Dati tecnici</strong>: l&apos;indirizzo IP e le informazioni che il browser invia quando apri il sito,
               usati per farlo funzionare e proteggerlo.
             </li>
@@ -407,7 +410,11 @@ function PrivacyIt() {
               proteggere il sito da ordini finti e abusi, per esempio limitando gli ordini inviati in poco tempo dallo
               stesso indirizzo IP: è un nostro legittimo interesse (art. 6.1.f GDPR);
             </li>
-            <li>rispondere alle tue domande prima di un ordine (art. 6.1.b GDPR).</li>
+            <li>rispondere alle tue domande prima di un ordine (art. 6.1.b GDPR);</li>
+            <li>
+              pubblicare la tua recensione con il nome (solo l&apos;iniziale del cognome) e la città: lo fai tu con la spunta
+              di consenso, che puoi ritirare quando vuoi scrivendoci (art. 6.1.a GDPR).
+            </li>
           </ul>
           <p>
             I dati dell&apos;ordine servono per poterlo gestire: senza non possiamo accettarlo. Non usiamo i tuoi dati per
@@ -435,6 +442,7 @@ function PrivacyIt() {
           <ul>
             <li>dati degli ordini: 10 anni, come chiede la legge per la contabilità;</li>
             <li>messaggi e richieste senza ordine: il tempo necessario per rispondere;</li>
+            <li>recensioni: finché restano sul sito o finché non ci chiedi di toglierle;</li>
             <li>indirizzo IP per il limite agli ordini: pochi minuti;</li>
             <li>dati tecnici di navigazione: per il tempo previsto dal fornitore che ospita il sito.</li>
           </ul>
@@ -501,6 +509,9 @@ function PrivacyEn() {
               <strong>Messages</strong>: what you write to us on WhatsApp or by email.
             </li>
             <li>
+              <strong>Reviews</strong>: if you leave one on the site, your name, city, product and the text you write.
+            </li>
+            <li>
               <strong>Technical data</strong>: your IP address and the information your browser sends when you open the
               site, used to run and protect it.
             </li>
@@ -515,7 +526,11 @@ function PrivacyEn() {
               to protect the site from fake orders and abuse, for example by limiting orders sent in a short time from the
               same IP address: our legitimate interest (Art. 6.1.f GDPR);
             </li>
-            <li>to answer your questions before an order (Art. 6.1.b GDPR).</li>
+            <li>to answer your questions before an order (Art. 6.1.b GDPR);</li>
+            <li>
+              to publish your review with your name (only the initial of your surname) and city: you choose this with the
+              consent box, and you can withdraw it at any time by messaging us (Art. 6.1.a GDPR).
+            </li>
           </ul>
           <p>
             Order details are needed to handle the order: without them we can&apos;t accept it. We don&apos;t use your data
@@ -540,6 +555,7 @@ function PrivacyEn() {
           <ul>
             <li>order details: 10 years, as required by law for accounting;</li>
             <li>messages and requests without an order: as long as needed to reply;</li>
+            <li>reviews: as long as they stay on the site or until you ask us to remove them;</li>
             <li>IP address for the order limit: a few minutes;</li>
             <li>technical browsing data: for the time set by the hosting provider.</li>
           </ul>

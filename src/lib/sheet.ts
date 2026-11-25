@@ -424,6 +424,7 @@ export const leggiBanner = cache(async (): Promise<FotoBanner[]> => {
 // Scheda RECENSIONI: una riga = una recensione. Colonne (riconosciute dal nome, l'ordine non conta):
 //   Screenshot      link della foto della chat (anche link di Google Drive)
 //   Frase           il messaggio del cliente, parola per parola
+//   Voto            facoltativo: stelle da 1 a 5 (anche "4/5" o "★★★★")
 //   Nome            nome del cliente: sul sito si vede solo il nome e l'iniziale del cognome
 //   Città           facoltativa
 //   Prodotto        facoltativo, il codice (es. BX-46): diventa il link alla pagina del prodotto
@@ -431,7 +432,16 @@ export const leggiBanner = cache(async (): Promise<FotoBanner[]> => {
 //   Attivo          facoltativo: senza spunta la recensione non si vede
 // Serve almeno lo screenshot o la frase. Se la scheda non c'è, la pagina mostra solo il link a Instagram.
 
-export type Recensione = { foto?: string; frase?: string; nome?: string; citta?: string; prodotto?: string; data?: string };
+export type Recensione = { foto?: string; frase?: string; voto?: number; nome?: string; citta?: string; prodotto?: string; data?: string };
+
+// "5", 5, "4/5", "★★★★" -> numero da 1 a 5; altrimenti niente stelle
+function stelle(v: unknown) {
+  const t = testo(v);
+  if (!t) return undefined;
+  const piene = (t.match(/[★⭐]/g) ?? []).length;
+  const n = piene || Number(t.split("/")[0].replace(",", "."));
+  return Number.isFinite(n) && n >= 1 && n <= 5 ? Math.round(n) : null;
+}
 
 // "Marco Rossi" -> "Marco R.": il cognome per intero non va sul sito
 function nomeBreve(v: unknown) {
@@ -459,6 +469,7 @@ export function righeInRecensioni(righe: unknown[][], oggi = new Date()): { rece
   const c = {
     foto: trova("screenshot", "screen", "foto", "immagine"),
     frase: trova("frase", "testo", "recensione", "messaggio"),
+    voto: trova("voto", "stelle"),
     nome: trova("nome"),
     citta: trova("citta"),
     prodotto: trova("prodotto", "codice"),
@@ -479,12 +490,15 @@ export function righeInRecensioni(righe: unknown[][], oggi = new Date()): { rece
       else problemi.push({ riga, codice: "RECENSIONI", motivo: "lo screenshot deve iniziare con https://", scartato: !frase });
     }
     if (!foto && !frase) return;
+    const voto = stelle(cella(r, c.voto));
+    if (voto === null) problemi.push({ riga, codice: "RECENSIONI", motivo: `voto «${testo(cella(r, c.voto))}» non valido (da 1 a 5)`, scartato: false });
     const d = dataPassata(cella(r, c.data), oggi);
     if (d === null) problemi.push({ riga, codice: "RECENSIONI", motivo: `data «${testo(cella(r, c.data))}» non valida`, scartato: false });
     recensioni.push({
       riga,
       foto,
       frase: frase || undefined,
+      voto: voto ?? undefined,
       nome: nomeBreve(cella(r, c.nome)),
       citta: testo(cella(r, c.citta)) || undefined,
       prodotto: testo(cella(r, c.prodotto)) || undefined,

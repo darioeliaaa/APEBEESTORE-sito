@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { CatalogoLista } from "@/components/CatalogoLista";
 import { PageHead } from "@/components/Sections";
 import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, lineeCatalogo, perStato, slugLinea } from "@/lib/sheet";
+import { metaPagina } from "./meta";
 
 // /catalogo: si sceglie la linea (Beyblade X, Pokémon...). Ogni linea ha la sua pagina /catalogo/<linea>
 export async function Catalogo({ lang }: { lang: Lingua }) {
@@ -45,8 +46,9 @@ export async function Catalogo({ lang }: { lang: Lingua }) {
 export async function CatalogoLinea({ lang, slug }: { lang: Lingua; slug: string }) {
   const t = testi[lang].catalogo;
   const prodotti = perStato((await leggiCatalogo()).prodotti, "ordinazione", "soldout").filter((p) => slugLinea(p.linea) === slug);
-  // una linea che non esiste (o non ha più prodotti): si torna alla scelta delle linee
-  if (!prodotti.length) redirect(percorso(lang, "/catalogo"));
+  // una linea che non esiste (o non ha più prodotti, es. un link vecchio): mostro la scelta delle linee
+  // (niente reindirizzamento: alla prima visita Next a volte lo manda doppio e il browser finisce su "non trovata")
+  if (!prodotti.length) return <Catalogo lang={lang} />;
   const nome = prodotti[0].linea;
   return (
     <>
@@ -75,4 +77,11 @@ export async function lineePerPagine() {
 
 export async function nomeDellaLinea(slug: string) {
   return lineeCatalogo((await leggiCatalogo()).prodotti).find((l) => l.slug === slug)?.nome;
+}
+
+// titolo e link per Google della pagina di una linea; se la linea non c'è più vale come /catalogo
+export async function metaLinea(lang: Lingua, slug: string): Promise<Metadata> {
+  const nome = await nomeDellaLinea(slug);
+  if (nome) return metaPagina(lang, `/catalogo/${slug}`, nome);
+  return { ...metaPagina(lang, "/catalogo", testi[lang].titoli.catalogo), robots: { index: false, follow: true } };
 }

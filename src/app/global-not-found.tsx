@@ -8,7 +8,7 @@ export const metadata: Metadata = { ...metaSito("it"), title: { absolute: "Pagin
 
 export default function GlobalNotFound() {
   return (
-    <Struttura lang="it">
+    <Struttura lang="it" nonTrovata>
       <NonTrovataDoppia />
     </Struttura>
   );

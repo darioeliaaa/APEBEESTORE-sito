@@ -34,16 +34,18 @@ function toggleTheme() {
 }
 
 // IT / EN: porta alla stessa pagina nell'altra lingua, tenendo anche i filtri del catalogo (?ordine=...)
-function Lingue({ className }: { className: string }) {
+// nella pagina "non trovata" la stessa pagina nell'altra lingua non esiste: si va alla home
+function Lingue({ className, nonTrovata }: { className: string; nonTrovata?: boolean }) {
   const { lang, t } = useLingua();
   const pathname = usePathname();
+  const dove = (path: string, l: Lingua) => (nonTrovata ? percorso(l, "/") : inLingua(path, l));
   return (
     <div className={className} role="group" aria-label={t.header.lingua}>
       {(["it", "en"] as Lingua[]).map((l, i) => (
         <Fragment key={l}>
           {i > 0 && <span aria-hidden="true">/</span>}
           <a
-            href={inLingua(pathname, l)}
+            href={dove(pathname, l)}
             hrefLang={l}
             lang={l}
             aria-label={testi[l].nome}
@@ -51,7 +53,7 @@ function Lingue({ className }: { className: string }) {
             onClick={(e) => {
               if (l === lang) return e.preventDefault();
               e.preventDefault();
-              window.location.href = inLingua(window.location.pathname, l) + window.location.search + window.location.hash;
+              window.location.href = nonTrovata ? dove("", l) : inLingua(window.location.pathname, l) + window.location.search + window.location.hash;
             }}
           >
             {testi[l].sigla}
@@ -62,7 +64,7 @@ function Lingue({ className }: { className: string }) {
   );
 }
 
-export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
+export function Header({ linee, nonTrovata }: { linee: { nome: string; slug: string }[]; nonTrovata?: boolean }) {
   const { count, apri } = useCart();
   const { lang, t } = useLingua();
   const pathname = usePathname();
@@ -183,10 +185,10 @@ export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
           {negozio.map((l) => voce(l))}
           <span className="nav-label">{t.header.info}</span>
           {info.map((l) => voce(l, "nav-info"))}
-          <Lingue className="lang lang--menu" />
+          <Lingue className="lang lang--menu" nonTrovata={nonTrovata} />
         </nav>
         <div className="tools">
-          <Lingue className="lang lang--barra" />
+          <Lingue className="lang lang--barra" nonTrovata={nonTrovata} />
           <Ricerca onApri={chiudiTutto} />
           <button className="icon-btn" type="button" aria-label={t.header.tema} onClick={toggleTheme}>
             <SunMoon size={22} strokeWidth={2} />
