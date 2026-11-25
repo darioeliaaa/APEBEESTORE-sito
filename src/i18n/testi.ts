@@ -52,6 +52,15 @@ const it = {
     lingua: "Lingua",
     linee: "Linee del catalogo",
   },
+  cerca: {
+    apri: "Cerca",
+    titolo: "Cerca",
+    campo: "Cerca per nome o codice",
+    esempio: "Scrivi il nome o il codice, per esempio BX-56.",
+    nessuno: (q: string) => `Nessun prodotto per "${q}".`,
+    trovati: (n: number) => (n === 1 ? "1 prodotto trovato" : `${n} prodotti trovati`),
+    chiudi: "Chiudi la ricerca",
+  },
   nav: {
     catalogo: "Catalogo",
     preordini: "Preordini",
@@ -296,6 +305,15 @@ const en: Testi = {
     carrello: (n: number) => `Cart, ${quantiEn(n)}`,
     lingua: "Language",
     linee: "Catalogue lines",
+  },
+  cerca: {
+    apri: "Search",
+    titolo: "Search",
+    campo: "Search by name or code",
+    esempio: "Type the name or the code, for example BX-56.",
+    nessuno: (q: string) => `No products for "${q}".`,
+    trovati: (n: number) => (n === 1 ? "1 product found" : `${n} products found`),
+    chiudi: "Close search",
   },
   nav: {
     catalogo: "Catalogue",

@@ -18,6 +18,7 @@ export type Riga = { p: Prodotto; qta: number };
 
 type CartContextValue = {
   righe: Riga[];
+  catalogo: Prodotto[]; // tutti i prodotti del foglio (serve anche alla ricerca)
   caricato: boolean; // false finché il carrello salvato nel browser non è stato letto
   count: number;
   totale: number;
@@ -219,7 +220,7 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
   const totale = righe.reduce((n, r) => n + r.p.prezzo * r.qta, 0);
 
   return (
-    <CartContext.Provider value={{ righe, caricato, count, totale, add, apri: () => setAperto(true), svuota: () => setRighe([]) }}>
+    <CartContext.Provider value={{ righe, catalogo: catalogo ?? [], caricato, count, totale, add, apri: () => setAperto(true), svuota: () => setRighe([]) }}>
       {children}
       {aperto && (
         <div className="carrello-sfondo" onClick={() => setAperto(false)}>

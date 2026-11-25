@@ -8,8 +8,7 @@ import { ChevronDown, Menu, ShoppingBag, SunMoon, X } from "lucide-react";
 import { useLingua } from "@/i18n/LinguaProvider";
 import { inLingua, percorso, testi, type Lingua } from "@/i18n/testi";
 import { useCart } from "./CartProvider";
-
-// la ricerca la aggiungiamo più avanti
+import { Ricerca } from "./Ricerca";
 
 // "Catalogo" è un menu a tendina con le linee (Beyblade X, Pokémon...), le altre voci sono link normali
 const negozio = [
@@ -188,6 +187,7 @@ export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
         </nav>
         <div className="tools">
           <Lingue className="lang lang--barra" />
+          <Ricerca onApri={chiudiTutto} />
           <button className="icon-btn" type="button" aria-label={t.header.tema} onClick={toggleTheme}>
             <SunMoon size={22} strokeWidth={2} />
           </button>
