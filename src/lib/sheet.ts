@@ -358,6 +358,15 @@ function linkSicuro(link: string) {
   return "";
 }
 
+// i link di Google Drive ("drive.google.com/file/d/ID/view", "open?id=ID") aprono la pagina di Drive, non la foto:
+// li trasformo nel link diretto all'immagine, così nel foglio si può incollare il link di Drive così com'è
+export function linkFoto(link: string) {
+  const id =
+    link.match(/^https:\/\/drive\.google\.com\/file\/d\/([\w-]+)/)?.[1] ??
+    link.match(/^https:\/\/drive\.google\.com\/(?:open|uc)\?(?:.*&)?id=([\w-]+)/)?.[1];
+  return id ? `https://lh3.googleusercontent.com/d/${id}` : link;
+}
+
 export function righeInBanner(righe: unknown[][]): { foto: FotoBanner[]; problemi: Problema[] } {
   const foto: FotoBanner[] = [];
   const problemi: Problema[] = [];
@@ -381,7 +390,7 @@ export function righeInBanner(righe: unknown[][]): { foto: FotoBanner[]; problem
         problemi.push({ riga, codice: "BANNER", motivo: `la foto «${img.slice(0, 40)}» deve iniziare con https://`, scartato: true });
         continue;
       }
-      foto.push({ immagine: img, link: linkOk || undefined });
+      foto.push({ immagine: linkFoto(img), link: linkOk || undefined });
     }
   });
   return { foto, problemi };

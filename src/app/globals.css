@@ -325,6 +325,7 @@ section.block--top .wrap { padding-top: 16px; }
 .carrello-qta { display: inline-flex; align-items: center; border: 2px solid var(--ink); border-radius: var(--radius-sm); width: max-content; }
 .carrello-qta button { background: transparent; border: 0; color: var(--ink); width: 36px; height: 36px; display: grid; place-items: center; cursor: pointer; }
 .carrello-qta button:hover { background: var(--surface-muted); }
+.carrello-qta button:disabled { opacity: .35; cursor: not-allowed; background: transparent; }
 .carrello-qta span { min-width: 28px; text-align: center; font: 500 14px/1 var(--font-mono); }
 .carrello-prezzo { font: 800 18px/36px var(--font-display); font-variant-numeric: tabular-nums; text-align: right; }
 .carrello-piede { padding: 18px 20px 22px; border-top: 2px solid var(--ink); display: flex; flex-direction: column; gap: 10px; }

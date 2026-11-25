@@ -9,6 +9,7 @@ import { euro, giorno } from "@/lib/format";
 
 // Carrello.
 // Preordini e riscatti app non si uniscono ad altri prodotti.
+// Un riscatto app è sempre da solo: un premio per ordine, una volta sola.
 // I preordini tra loro solo se hanno la stessa data.
 // I testi (anche i messaggi) sono nel dizionario src/i18n/testi.ts.
 
@@ -33,6 +34,7 @@ export function motivoBlocco(nelCarrello: Prodotto[], p: Prodotto, lang: Lingua)
   if (p.stato === "soldout") return b.soldout;
   const primo = nelCarrello[0];
   if (!primo) return null;
+  if (primo.stato === "riscatto" && p.stato === "riscatto") return b.unRiscatto;
   if (primo.stato !== p.stato) {
     if (p.stato === "preordine") return b.preordine;
     if (p.stato === "riscatto") return b.riscatto;
@@ -50,6 +52,8 @@ export function motivoBlocco(nelCarrello: Prodotto[], p: Prodotto, lang: Lingua)
 const MEMORIA = "apebeestore-carrello";
 const DURATA = 14 * 24 * 60 * 60 * 1000;
 const MAX_QTA = 99;
+// quanti pezzi dello stesso prodotto: un premio dei riscatti si prende una volta sola
+const massimo = (p: Prodotto) => (p.stato === "riscatto" ? 1 : MAX_QTA);
 const statiValidi = ["ordinazione", "preordine", "riscatto", "soldout"];
 
 // quello che arriva dal browser lo ricontrollo: potrebbe essere vecchio o modificato a mano
@@ -102,7 +106,7 @@ function allinea(salvate: Riga[], catalogo: Prodotto[] | null, lang: Lingua): { 
       continue;
     }
     if (ora.prezzo !== r.p.prezzo) avvisi.push(a.prezzo(ora.codice, euro(ora.prezzo, lang)));
-    righe.push({ p: ora, qta: r.qta });
+    righe.push({ p: ora, qta: Math.min(r.qta, massimo(ora)) });
   }
   return { righe, avvisi };
 }
@@ -203,7 +207,7 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
 
   const cambia = (codice: string, di: number) =>
     setRighe((rr) =>
-      rr.map((r) => (r.p.codice === codice ? { ...r, qta: Math.min(MAX_QTA, r.qta + di) } : r)).filter((r) => r.qta > 0),
+      rr.map((r) => (r.p.codice === codice ? { ...r, qta: Math.min(massimo(r.p), r.qta + di) } : r)).filter((r) => r.qta > 0),
     );
 
   const count = righe.reduce((n, r) => n + r.qta, 0);
@@ -254,7 +258,12 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
                           {qta > 1 ? <Minus size={16} strokeWidth={2.4} /> : <Trash2 size={16} strokeWidth={2.2} />}
                         </button>
                         <span aria-label={t.carrello.quantita(qta)}>{qta}</span>
-                        <button type="button" aria-label={t.carrello.aggiungiUno(p.codice)} onClick={() => cambia(p.codice, 1)}>
+                        <button
+                          type="button"
+                          aria-label={t.carrello.aggiungiUno(p.codice)}
+                          disabled={qta >= massimo(p)}
+                          onClick={() => cambia(p.codice, 1)}
+                        >
                           <Plus size={16} strokeWidth={2.4} />
                         </button>
                       </div>

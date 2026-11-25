@@ -138,6 +138,7 @@ const it = {
       riscatto: "I riscatti app vanno in un ordine a parte.",
       hoPreordine: "Hai un preordine nel carrello: questo va in un ordine a parte.",
       hoRiscatto: "Hai un riscatto app nel carrello: questo va in un ordine a parte.",
+      unRiscatto: "Puoi riscattare un solo premio per ordine.",
       data: (giorno?: string) =>
         giorno ? `Puoi unire solo preordini con la stessa data (${giorno}).` : "Puoi unire solo preordini con la stessa data.",
     },
@@ -169,10 +170,10 @@ const it = {
     titolo: "Riscatti app",
     testo: "I premi da riscattare con il codice dell'app Beyblade X.",
     avvisoTitolo: "Si ordinano da soli.",
-    avviso: "Non si possono unire ad altri prodotti o preordini.",
+    avviso: "Un premio per ordine: non si unisce ad altri prodotti, preordini o premi.",
     vuoto: "I premi di questo mese arrivano a breve.",
     comeTitolo: "Come funziona il riscatto",
-    come: "Scegli il premio, inserisci il codice dell'app quando ordini, ti arriva a casa.",
+    come: "Scegli il premio e inseriscilo con il codice dell'app quando ordini: il codice lo sblocca a € 35 e ti arriva a casa.",
   },
   recensioni: {
     label: "I nostri clienti",
@@ -332,6 +333,7 @@ const en: Testi = {
       riscatto: "App rewards go in a separate order.",
       hoPreordine: "You have a pre-order in your cart: this goes in a separate order.",
       hoRiscatto: "You have an app reward in your cart: this goes in a separate order.",
+      unRiscatto: "You can redeem only one prize per order.",
       data: (giorno?: string) =>
         giorno ? `You can only combine pre-orders with the same release date (${giorno}).` : "You can only combine pre-orders with the same release date.",
     },
@@ -363,10 +365,10 @@ const en: Testi = {
     titolo: "App rewards",
     testo: "Prizes you can redeem with a code from the Beyblade X app.",
     avvisoTitolo: "Ordered on their own.",
-    avviso: "They can't be combined with other products or pre-orders.",
+    avviso: "One prize per order: it can't be combined with other products, pre-orders or prizes.",
     vuoto: "This month's prizes are coming soon.",
     comeTitolo: "How redeeming works",
-    come: "Pick the prize, enter your app code when you order, and it arrives at your home.",
+    come: "Pick the prize and enter your app code when you order: the code unlocks it for €35 and it arrives at your home.",
   },
   recensioni: {
     label: "Our customers",
