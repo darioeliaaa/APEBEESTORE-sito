@@ -9,6 +9,7 @@ import { copia } from "@/lib/copia";
 import { euro, giorno } from "@/lib/format";
 import { NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
 import { useCart, type Riga } from "./CartProvider";
+import { PageHead } from "./Sections";
 
 // Pagina dell'ordine, in due passi:
 // 1) "Ordine con obbligo di pagamento": il sito lo manda allo script di Nicholas (scheda Ordini + email) e riceve il numero ORD-...
@@ -260,19 +261,26 @@ export function Ordine() {
     window.scrollTo({ top: 0 });
   }
 
+  // la testata della pagina cambia con l'ordine inviato: "Compila i tuoi dati" non serve più
+  const cornice = (contenuto: React.ReactNode, testa = { label: o.label, titolo: o.titolo, testo: o.testo }) => (
+    <>
+      <PageHead label={testa.label} titolo={testa.titolo} testo={testa.testo} />
+      <section className="block block--top">
+        <div className="wrap">{contenuto}</div>
+      </section>
+    </>
+  );
+
   if (inviato) {
-    return (
+    return cornice(
       <div className="ordine-pronto">
-        <span className="label">{inviato.codice}</span>
-        <h2>{inviato.registrato ? o.pronto : o.prontoSenzaFoglio}</h2>
-        <p>{inviato.registrato ? o.prontoTesto(inviato.codice) : o.prontoTestoSenzaFoglio(inviato.codice)}</p>
-        <a className="btn btn--primary ordine-invia" href={inviato.link} target="_blank" rel="noopener noreferrer">
-          {o.apriWhatsApp}
-        </a>
-        {/* se WhatsApp non si apre: il messaggio si copia e si manda a mano al numero scritto per intero */}
-        <div className="ordine-a-mano">
+        <div className="ordine-pronto-tasti">
+          <a className="btn btn--primary ordine-invia" href={inviato.link} target="_blank" rel="noopener noreferrer">
+            {o.apriWhatsApp}
+          </a>
+          {/* se WhatsApp non si apre: il messaggio si copia e si manda a mano al numero scritto per intero */}
           <button
-            className="btn btn--ghost btn--sm"
+            className="btn btn--ghost"
             type="button"
             onClick={async () => {
               if (await copia(inviato.testo)) {
@@ -283,11 +291,11 @@ export function Ordine() {
           >
             {copiato ? o.copiato : o.copia}
           </button>
-          <p>{o.aMano(NUMERO_LEGGIBILE.replace(/ /g, "\u00a0"))}</p>
-          <span className="sr-only" role="status">
-            {copiato ? o.copiato : ""}
-          </span>
         </div>
+        <p className="ordine-a-mano">{o.aMano(NUMERO_LEGGIBILE.replace(/ /g, "\u00a0"))}</p>
+        <span className="sr-only" role="status">
+          {copiato ? o.copiato : ""}
+        </span>
         <Link
           className="link"
           href={percorso(lang, "/catalogo")}
@@ -299,21 +307,26 @@ export function Ordine() {
         >
           {o.continua}
         </Link>
-      </div>
+      </div>,
+      {
+        label: inviato.codice,
+        titolo: inviato.registrato ? o.pronto : o.prontoSenzaFoglio,
+        testo: inviato.registrato ? o.prontoTesto(inviato.codice) : o.prontoTestoSenzaFoglio(inviato.codice),
+      },
     );
   }
 
   // finché il carrello salvato non è stato letto non mostro niente (niente "carrello vuoto" per un attimo)
-  if (!caricato) return <div className="ordine-attesa" aria-busy="true" />;
+  if (!caricato) return cornice(<div className="ordine-attesa" aria-busy="true" />);
 
   if (!righe.length) {
-    return (
+    return cornice(
       <div className="vuoto">
         <p>{o.vuoto}</p>
         <Link className="btn btn--primary btn--sm" href={percorso(lang, "/catalogo")}>
           {o.vaiCatalogo}
         </Link>
-      </div>
+      </div>,
     );
   }
 
@@ -332,7 +345,7 @@ export function Ordine() {
     </label>
   );
 
-  return (
+  return cornice(
     <div className="ordine">
       <aside className="ordine-riepilogo" aria-label={o.riepilogo}>
         <h2>{o.riepilogo}</h2>
@@ -503,6 +516,6 @@ export function Ordine() {
         </button>
         <p className="campo-aiuto">{o.aiutoInvio}</p>
       </form>
-    </div>
+    </div>,
   );
 }

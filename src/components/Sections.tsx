@@ -6,18 +6,6 @@ import { linkWhatsApp } from "@/lib/whatsapp";
 import { Banner } from "./Banner";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
-export function DemoBanner({ lang, dalFoglio }: { lang: Lingua; dalFoglio: boolean }) {
-  const t = testi[lang].demo;
-  return (
-    <div className="demo">
-      <div className="wrap">
-        <span>{t.prova}</span>
-        <span>{dalFoglio ? t.foglio : t.finti}</span>
-      </div>
-    </div>
-  );
-}
-
 export function Hero({ lang, foto }: { lang: Lingua; foto: FotoBanner[] }) {
   const t = testi[lang].hero;
   return (

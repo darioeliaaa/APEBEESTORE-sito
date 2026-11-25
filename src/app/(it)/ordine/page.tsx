@@ -5,5 +5,5 @@ import { OrdinePagina } from "@/pagine/OrdinePagina";
 export const metadata = metaPagina("it", "/ordine", testi.it.titoli.ordine);
 
 export default function Pagina() {
-  return <OrdinePagina lang="it" />;
+  return <OrdinePagina />;
 }

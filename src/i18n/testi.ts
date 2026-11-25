@@ -42,7 +42,6 @@ const it = {
     condizioni: "Condizioni di vendita",
     privacy: "Privacy e cookie",
   },
-  demo: { prova: "Versione di prova", foglio: "Prodotti presi dal Google Sheet", finti: "Prodotti e prezzi non reali" },
   header: {
     home: "APEBEESTORE, home",
     menu: "Menu principale",
@@ -344,7 +343,6 @@ const en: Testi = {
     condizioni: "Terms of sale",
     privacy: "Privacy and cookies",
   },
-  demo: { prova: "Preview version", foglio: "Products from the Google Sheet", finti: "Sample products and prices" },
   header: {
     home: "APEBEESTORE, home",
     menu: "Main menu",

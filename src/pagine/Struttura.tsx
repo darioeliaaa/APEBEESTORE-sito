@@ -1,7 +1,7 @@
 import { Archivo, JetBrains_Mono, Montserrat } from "next/font/google";
 import { CartProvider } from "@/components/CartProvider";
 import { Header } from "@/components/Header";
-import { DemoBanner, Footer } from "@/components/Sections";
+import { Footer } from "@/components/Sections";
 import { LinguaProvider } from "@/i18n/LinguaProvider";
 import type { Lingua } from "@/i18n/testi";
 import { leggiCatalogo, lineeCatalogo } from "@/lib/sheet";
@@ -16,9 +16,8 @@ const themeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||t===
 // la struttura comune a tutte le pagine, in italiano (src/app/(it)) e in inglese (src/app/en)
 export async function Struttura({ lang, children }: { lang: Lingua; children: React.ReactNode }) {
   // se il foglio ha un problema l'errore lo gestisce la pagina (che resta all'ultima versione buona):
-  // qui basta sapere da dove arrivano i prodotti, così anche /controllo si apre lo stesso
+  // qui il catalogo serve solo a carrello e menu, così anche /controllo si apre lo stesso
   const catalogo = await leggiCatalogo().catch(() => null);
-  const dalFoglio = catalogo ? catalogo.dalFoglio : true;
   // al carrello serve il catalogo di adesso per aggiornare prezzi, disponibilità e foto
   // (senza descrizioni e foto in più, che servono solo nella pagina del prodotto)
   const perCarrello = catalogo ? catalogo.prodotti.map(({ foto, descrizione, ...p }) => p) : null;
@@ -32,7 +31,6 @@ export async function Struttura({ lang, children }: { lang: Lingua; children: Re
       <body>
         <LinguaProvider lang={lang}>
           <CartProvider catalogo={perCarrello}>
-            <DemoBanner lang={lang} dalFoglio={dalFoglio} />
             <Header linee={linee} />
             <main>{children}</main>
             <Footer lang={lang} />
