@@ -48,9 +48,9 @@ export const faqIt: GruppoFaq[] = [
     id: "spedizioni-e-consegne",
     gruppo: "Spedizioni e consegne",
     domande: [
-      { domanda: "Quanto costa la spedizione?", risposta: "Italia € 8, Europa € 15, resto del mondo da € 50." },
+      { domanda: "Quanto costa la spedizione?", risposta: "Italia € 8, Europa € 15, resto del mondo € 50." },
       { domanda: "Fate consegne a mano?", risposta: "Sì, consegniamo a mano a Milano, Como e Varese. Il punto d'incontro si concorda su WhatsApp." },
-      { domanda: "Spedite all'estero?", risposta: "Sì, in tutta Europa a € 15 e nel resto del mondo a partire da € 50." },
+      { domanda: "Spedite all'estero?", risposta: "Sì, in tutta Europa a € 15 e nel resto del mondo a € 50." },
       { domanda: "Dove si trova APEBEESTORE?", risposta: "Siamo a Milano. Non abbiamo un negozio fisico: vendiamo online, consegniamo a mano a Milano, Como e Varese e portiamo i prodotti in alcune fiere." },
     ],
   },
@@ -107,9 +107,9 @@ export const faqEn: GruppoFaq[] = [
     id: "spedizioni-e-consegne",
     gruppo: "Shipping and delivery",
     domande: [
-      { domanda: "How much is shipping?", risposta: "Italy €8, Europe €15, rest of the world from €50." },
+      { domanda: "How much is shipping?", risposta: "Italy €8, Europe €15, rest of the world €50." },
       { domanda: "Do you deliver by hand?", risposta: "Yes, we deliver by hand in Milan, Como and Varese. We agree on the meeting point on WhatsApp." },
-      { domanda: "Do you ship abroad?", risposta: "Yes, anywhere in Europe for €15 and to the rest of the world from €50." },
+      { domanda: "Do you ship abroad?", risposta: "Yes, anywhere in Europe for €15 and to the rest of the world for €50." },
       { domanda: "Where is APEBEESTORE based?", risposta: "We're in Milan. We don't have a physical shop: we sell online, deliver by hand in Milan, Como and Varese and bring our products to some fairs." },
     ],
   },

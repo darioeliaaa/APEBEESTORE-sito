@@ -1,5 +1,7 @@
+import { AtSign, Mail, MessageCircle } from "lucide-react";
 import { Community, PageHead } from "@/components/Sections";
 import type { Lingua } from "@/i18n/testi";
+import { EMAIL, NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -20,6 +22,7 @@ export function ChiSiamo({ lang }: { lang: Lingua }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <PageHead label="APEBEESTORE" titolo={testa[lang].titolo} testo={testa[lang].testo} stretto />
       {lang === "en" ? <TestoEn /> : <TestoIt />}
+      <Contatti lang={lang} />
       <Community lang={lang} />
     </>
   );
@@ -82,7 +85,7 @@ function TestoIt() {
           <li>Consegna a mano a Milano, Como e Varese</li>
           <li>Spedizione in tutta Italia a € 8</li>
           <li>Spedizione in Europa a € 15</li>
-          <li>Spedizione nel resto del mondo a partire da € 50</li>
+          <li>Spedizione nel resto del mondo a € 50</li>
         </ul>
 
         <h2>Perché fidarsi</h2>
@@ -160,7 +163,7 @@ function TestoEn() {
           <li>Hand delivery in Milan, Como and Varese</li>
           <li>Shipping anywhere in Italy for €8</li>
           <li>Shipping to Europe for €15</li>
-          <li>Shipping to the rest of the world from €50</li>
+          <li>Shipping to the rest of the world for €50</li>
         </ul>
 
         <h2>Why trust us</h2>
@@ -176,6 +179,79 @@ function TestoEn() {
           </a>{" "}
           or join the WhatsApp community to see new releases as soon as we announce them.
         </p>
+      </div>
+    </section>
+  );
+}
+
+const contatti = {
+  it: {
+    titolo: "Contatti",
+    testo: "Hai una domanda prima di ordinare? Scrivici su WhatsApp, rispondiamo lì.",
+    whatsapp: "Scrivici su WhatsApp",
+    messaggio: "Ciao, ho una domanda su ",
+    numero: "Numero WhatsApp",
+    email: "Email",
+    instagram: "Instagram",
+  },
+  en: {
+    titolo: "Contact",
+    testo: "Got a question before ordering? Message us on WhatsApp, we reply there.",
+    whatsapp: "Message us on WhatsApp",
+    messaggio: "Hi, I have a question about ",
+    numero: "WhatsApp number",
+    email: "Email",
+    instagram: "Instagram",
+  },
+};
+
+// contatti scritti per intero, così si possono copiare anche se il link non si apre
+function Contatti({ lang }: { lang: Lingua }) {
+  const t = contatti[lang];
+  return (
+    <section className="block contatti" id="contatti">
+      <div className="wrap narrow">
+        <div className="sec-head">
+          <div>
+            <span className="label">APEBEESTORE</span>
+            <h2>{t.titolo}</h2>
+            <p>{t.testo}</p>
+          </div>
+        </div>
+        <a className="btn btn--primary contatti-wa" href={linkWhatsApp(t.messaggio)} target="_blank" rel="noopener noreferrer">
+          <MessageCircle size={20} strokeWidth={2.2} aria-hidden="true" />
+          {t.whatsapp}
+        </a>
+        <dl className="contatti-lista">
+          <div>
+            <dt>
+              <MessageCircle size={18} strokeWidth={2} aria-hidden="true" /> {t.numero}
+            </dt>
+            <dd>
+              <a href={linkWhatsApp()} target="_blank" rel="noopener noreferrer">
+                {NUMERO_LEGGIBILE}
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <Mail size={18} strokeWidth={2} aria-hidden="true" /> {t.email}
+            </dt>
+            <dd>
+              <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+            </dd>
+          </div>
+          <div>
+            <dt>
+              <AtSign size={18} strokeWidth={2} aria-hidden="true" /> {t.instagram}
+            </dt>
+            <dd>
+              <a href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">
+                @apebeestore
+              </a>
+            </dd>
+          </div>
+        </dl>
       </div>
     </section>
   );

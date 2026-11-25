@@ -12,6 +12,7 @@ import type { Prodotto, Stato } from "@/data/demo";
 
 const FOGLIO = "CATALOGO";
 const FOGLIO_BANNER = "BANNER"; // scheda con le foto del banner in home
+const FOGLIO_RECENSIONI = "RECENSIONI"; // scheda con le recensioni dei clienti
 // secondi: il sito rilegge il foglio ogni 5 minuti (in locale ogni 10 secondi, così le prove si vedono subito)
 const AGGIORNA_OGNI = process.env.NODE_ENV === "development" ? 10 : 300;
 
@@ -118,6 +119,9 @@ function colonne(intestazione: unknown[]) {
     immagine: trova("immagine"),
     attivo: trova("attivo"),
     uscita: trova("datauscita", "uscita"),
+    // facoltative: il testo sotto la foto nella pagina del prodotto
+    descrizione: nomi.findIndex((n) => n === "descrizione" || n === "descrizioneit"),
+    descrizioneEn: nomi.findIndex((n) => n === "descrizioneen" || n === "description"),
   };
   // senza queste il sito non può funzionare: meglio fermarsi che pubblicare un catalogo sbagliato
   const servono = { codice: "Codice", nome: "Nome", stato: "Stato", prezzo: "Prezzo pubblico" } as const;
@@ -268,9 +272,16 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
       if (!uscita && dallaColonna !== null) avvisa("preordine senza data di uscita");
     }
 
+    // più foto nella stessa cella, separate da virgola, spazio o a capo: la prima è quella della card
     const img = testo(cella(r, c.immagine));
-    if (img && !img.startsWith("https://")) avvisa("il link della foto deve iniziare con https://");
+    const foto = img
+      .split(/[\s,]+(?=https?:\/\/)/)
+      .map((f) => f.trim().replace(/,$/, ""))
+      .filter(Boolean);
+    if (foto.some((f) => !f.startsWith("https://"))) avvisa("il link della foto deve iniziare con https://");
+    const buone = foto.filter((f) => f.startsWith("https://")).map(linkFoto);
     const nomeSito = nome(nomeGrezzo, codice);
+    const descrizione = { it: testo(cella(r, c.descrizione)) || undefined, en: testo(cella(r, c.descrizioneEn)) || undefined };
 
     prodotti.push({
       codice,
@@ -280,7 +291,9 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
       prezzo: euro,
       stato,
       uscita,
-      immagine: img.startsWith("https://") ? img : undefined,
+      immagine: buone[0],
+      ...(buone.length > 1 ? { foto: buone } : {}),
+      ...(descrizione.it || descrizione.en ? { descrizione } : {}),
     });
   });
 
@@ -328,14 +341,18 @@ export async function controllaFoglio(): Promise<{ prodotti: number; problemi: P
     const righe = await leggiRighe(FOGLIO, true);
     if (!righe) return { prodotti: 0, problemi: [], errore: `Nel Google Sheet non trovo la scheda ${FOGLIO}` };
     const banner = await leggiRighe(FOGLIO_BANNER, true).catch(() => null);
+    const recensioni = await leggiRighe(FOGLIO_RECENSIONI, true).catch(() => null);
     const risultato = righeInProdotti(righe);
-    if (banner) risultato.problemi.push(...righeInBanner(banner).problemi);
+    // il controllo "troppe righe sbagliate" vale solo per il catalogo, non per banner e recensioni
+    let errore: string | undefined;
     try {
       controlla(risultato);
     } catch (e) {
-      return { prodotti: risultato.prodotti.length, problemi: risultato.problemi, errore: (e as Error).message };
+      errore = (e as Error).message;
     }
-    return { prodotti: risultato.prodotti.length, problemi: risultato.problemi };
+    if (banner) risultato.problemi.push(...righeInBanner(banner).problemi);
+    if (recensioni) risultato.problemi.push(...righeInRecensioni(recensioni).problemi);
+    return { prodotti: risultato.prodotti.length, problemi: risultato.problemi, ...(errore ? { errore } : {}) };
   } catch (e) {
     return { prodotti: 0, problemi: [], errore: (e as Error).message };
   }
@@ -401,6 +418,90 @@ export const leggiBanner = cache(async (): Promise<FotoBanner[]> => {
   // se Google non risponde l'errore sale e la home resta all'ultima versione buona
   const righe = await leggiRighe(FOGLIO_BANNER);
   return righe ? righeInBanner(righe).foto.slice(0, 10) : [];
+});
+
+// ---------- recensioni ----------
+// Scheda RECENSIONI: una riga = una recensione. Colonne (riconosciute dal nome, l'ordine non conta):
+//   Screenshot      link della foto della chat (anche link di Google Drive)
+//   Frase           il messaggio del cliente, parola per parola
+//   Nome            nome del cliente: sul sito si vede solo il nome e l'iniziale del cognome
+//   Città           facoltativa
+//   Prodotto        facoltativo, il codice (es. BX-46): diventa il link alla pagina del prodotto
+//   Data            facoltativa: se c'è, le recensioni vanno dalla più recente; se no, le righe più in basso vengono prima
+//   Attivo          facoltativo: senza spunta la recensione non si vede
+// Serve almeno lo screenshot o la frase. Se la scheda non c'è, la pagina mostra solo il link a Instagram.
+
+export type Recensione = { foto?: string; frase?: string; nome?: string; citta?: string; prodotto?: string; data?: string };
+
+// "Marco Rossi" -> "Marco R.": il cognome per intero non va sul sito
+function nomeBreve(v: unknown) {
+  const parti = testo(v).split(/\s+/).filter(Boolean);
+  if (parti.length < 2) return parti[0] && maiuscola(parti[0]);
+  return `${maiuscola(parti[0])} ${parti[parti.length - 1][0].toUpperCase()}.`;
+}
+
+// le recensioni sono del passato: "3/11" senza anno è il 3 novembre scorso, non quello che verrà
+function dataPassata(v: unknown, oggi = new Date()) {
+  const d = data(v, oggi);
+  if (!d) return d;
+  const [a, m, g] = d.split("-");
+  // l'anno lo tolgo solo se non era scritto ("3/11"); con "3/11/26" o "2026-11-03" resta quello
+  const conAnno = /^\d{4}-|[/.-]\d{1,2}[/.-]\d{2,4}$/.test(testo(v));
+  return d > oggi.toISOString().slice(0, 10) && !conAnno ? `${+a - 1}-${m}-${g}` : d;
+}
+
+export function righeInRecensioni(righe: unknown[][], oggi = new Date()): { recensioni: Recensione[]; problemi: Problema[] } {
+  const recensioni: (Recensione & { riga: number })[] = [];
+  const problemi: Problema[] = [];
+  if (righe.length < 2) return { recensioni: [], problemi };
+  const nomi = righe[0].map(pulisci);
+  const trova = (...chiavi: string[]) => nomi.findIndex((n) => chiavi.some((k) => n.startsWith(k)));
+  const c = {
+    foto: trova("screenshot", "screen", "foto", "immagine"),
+    frase: trova("frase", "testo", "recensione", "messaggio"),
+    nome: trova("nome"),
+    citta: trova("citta"),
+    prodotto: trova("prodotto", "codice"),
+    data: trova("data"),
+    attivo: trova("attivo"),
+  };
+  const cella = (r: unknown[], i: number) => (i >= 0 ? r[i] : undefined);
+
+  righe.slice(1).forEach((r, i) => {
+    const riga = i + 2;
+    if (c.attivo >= 0 && testo(r[c.attivo]) !== "" && !attivo(r[c.attivo])) return;
+    const fotoGrezza = testo(cella(r, c.foto));
+    const frase = testo(cella(r, c.frase)).slice(0, 600);
+    if (!fotoGrezza && !frase) return; // riga vuota
+    let foto: string | undefined;
+    if (fotoGrezza) {
+      if (fotoGrezza.startsWith("https://")) foto = linkFoto(fotoGrezza.split(/\s+/)[0]);
+      else problemi.push({ riga, codice: "RECENSIONI", motivo: "lo screenshot deve iniziare con https://", scartato: !frase });
+    }
+    if (!foto && !frase) return;
+    const d = dataPassata(cella(r, c.data), oggi);
+    if (d === null) problemi.push({ riga, codice: "RECENSIONI", motivo: `data «${testo(cella(r, c.data))}» non valida`, scartato: false });
+    recensioni.push({
+      riga,
+      foto,
+      frase: frase || undefined,
+      nome: nomeBreve(cella(r, c.nome)),
+      citta: testo(cella(r, c.citta)) || undefined,
+      prodotto: testo(cella(r, c.prodotto)) || undefined,
+      data: d || undefined,
+    });
+  });
+
+  // dalla più recente: prima per data, poi le righe più in basso del foglio
+  recensioni.sort((x, y) => (y.data ?? "").localeCompare(x.data ?? "") || y.riga - x.riga);
+  return { recensioni: recensioni.map(({ riga, ...resto }) => resto), problemi }; // eslint-disable-line @typescript-eslint/no-unused-vars
+}
+
+export const leggiRecensioni = cache(async (): Promise<Recensione[]> => {
+  if (!chiavi()) return [];
+  // se Google non risponde l'errore sale e la pagina resta all'ultima versione buona
+  const righe = await leggiRighe(FOGLIO_RECENSIONI);
+  return righe ? righeInRecensioni(righe).recensioni : [];
 });
 
 // ---------- linee (Beyblade X, Pokémon...) ----------

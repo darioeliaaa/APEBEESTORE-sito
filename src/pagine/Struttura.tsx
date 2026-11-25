@@ -20,7 +20,8 @@ export async function Struttura({ lang, children }: { lang: Lingua; children: Re
   const catalogo = await leggiCatalogo().catch(() => null);
   const dalFoglio = catalogo ? catalogo.dalFoglio : true;
   // al carrello serve il catalogo di adesso per aggiornare prezzi, disponibilità e foto
-  const perCarrello = catalogo ? catalogo.prodotti : null;
+  // (senza descrizioni e foto in più, che servono solo nella pagina del prodotto)
+  const perCarrello = catalogo ? catalogo.prodotti.map(({ foto, descrizione, ...p }) => p) : null;
   // le linee del catalogo (Beyblade X, Pokémon...) per il menu a tendina
   const linee = catalogo ? lineeCatalogo(catalogo.prodotti).map(({ nome, slug }) => ({ nome, slug })) : [];
   return (

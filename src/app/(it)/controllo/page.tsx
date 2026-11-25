@@ -17,7 +17,7 @@ export default async function Controllo() {
 
   return (
     <>
-      <PageHead label="Solo per noi" titolo="Controllo foglio" testo="Le righe delle schede CATALOGO e BANNER che hanno qualcosa che non va." stretto />
+      <PageHead label="Solo per noi" titolo="Controllo foglio" testo="Le righe delle schede CATALOGO, BANNER e RECENSIONI che hanno qualcosa che non va." stretto />
       <section className="block block--top">
         <div className="wrap narrow">
           {errore ? (

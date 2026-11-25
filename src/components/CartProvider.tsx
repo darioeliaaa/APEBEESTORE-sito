@@ -22,9 +22,11 @@ type CartContextValue = {
   caricato: boolean; // false finché il carrello salvato nel browser non è stato letto
   count: number;
   totale: number;
-  add: (p: Prodotto) => void;
+  add: (p: Prodotto, qta?: number) => void;
   apri: () => void;
   svuota: () => void;
+  aggiornaPrezzi: (prezzi: { codice: string; prezzo: number }[]) => void;
+  rimuovi: (codice: string) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -124,6 +126,10 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
   const [caricato, setCaricato] = useState(false);
   const [aperto, setAperto] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  // l'ultimo prodotto tolto dal carrello: per qualche secondo si può rimettere con "Annulla"
+  const [tolto, setTolto] = useState<{ riga: Riga; pos: number } | null>(null);
+  const timerTolto = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const annullaBtn = useRef<HTMLButtonElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chiudiBtn = useRef<HTMLButtonElement>(null);
   const pannello = useRef<HTMLElement>(null);
@@ -151,7 +157,18 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
     timer.current = setTimeout(() => setToast(null), 3200);
   }, []);
 
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+      if (timerTolto.current) clearTimeout(timerTolto.current);
+    },
+    [],
+  );
+
+  // tolto un prodotto, il cursore della tastiera va su "Annulla" (il tasto che aveva premuto non c'è più)
+  useEffect(() => {
+    if (tolto) annullaBtn.current?.focus();
+  }, [tolto]);
 
   useEffect(() => {
     if (avvisi.length) show(t.carrello.aggiornato);
@@ -186,25 +203,29 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
       // chiuso il carrello, il cursore torna dov'era (sull'icona del carrello); gli avvisi li hai già visti
       prima.current?.focus();
       setAvvisi([]);
+      setTolto(null);
     };
   }, [aperto]);
 
   const add = useCallback(
-    (p: Prodotto) => {
+    (p: Prodotto, qta = 1) => {
       const blocco = motivoBlocco(righe.map((r) => r.p), p, lang);
       if (blocco) {
         show(blocco);
         return;
       }
+      // nel carrello vanno solo i dati che servono (niente descrizioni e foto in più)
+      const { foto, descrizione, ...leggero } = p; // eslint-disable-line @typescript-eslint/no-unused-vars
       const gia = righe.find((r) => r.p.codice === p.codice);
       if (gia && gia.qta >= MAX_QTA) {
         show(t.carrello.massimo(MAX_QTA));
         return;
       }
+      const quanti = Math.max(1, Math.min(Math.floor(qta), massimo(p)));
       setRighe((rr) =>
         rr.some((r) => r.p.codice === p.codice)
-          ? rr.map((r) => (r.p.codice === p.codice ? { ...r, qta: r.qta + 1 } : r))
-          : [...rr, { p, qta: 1 }],
+          ? rr.map((r) => (r.p.codice === p.codice ? { ...r, qta: Math.min(r.qta + quanti, massimo(p)) } : r))
+          : [...rr, { p: leggero, qta: quanti }],
       );
       show(t.carrello.aggiunto(p.codice));
     },
@@ -216,11 +237,50 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
       rr.map((r) => (r.p.codice === codice ? { ...r, qta: Math.min(massimo(r.p), r.qta + di) } : r)).filter((r) => r.qta > 0),
     );
 
+  const togli = (codice: string) => {
+    const pos = righe.findIndex((r) => r.p.codice === codice);
+    if (pos < 0) return;
+    setTolto({ riga: righe[pos], pos });
+    setRighe((rr) => rr.filter((r) => r.p.codice !== codice));
+    if (timerTolto.current) clearTimeout(timerTolto.current);
+    timerTolto.current = setTimeout(() => setTolto(null), 6000);
+  };
+
+  const annulla = () => {
+    if (!tolto) return;
+    const blocco = motivoBlocco(righe.map((r) => r.p), tolto.riga.p, lang);
+    if (blocco) show(blocco);
+    else
+      setRighe((rr) =>
+        rr.some((r) => r.p.codice === tolto.riga.p.codice) ? rr : [...rr.slice(0, tolto.pos), tolto.riga, ...rr.slice(tolto.pos)],
+      );
+    setTolto(null);
+    chiudiBtn.current?.focus();
+  };
+
   const count = righe.reduce((n, r) => n + r.qta, 0);
   const totale = righe.reduce((n, r) => n + r.p.prezzo * r.qta, 0);
 
   return (
-    <CartContext.Provider value={{ righe, catalogo: catalogo ?? [], caricato, count, totale, add, apri: () => setAperto(true), svuota: () => setRighe([]) }}>
+    <CartContext.Provider
+      value={{
+        righe,
+        catalogo: catalogo ?? [],
+        caricato,
+        count,
+        totale,
+        add,
+        apri: () => setAperto(true),
+        svuota: () => setRighe([]),
+        // il server dice che un prezzo è cambiato mentre il cliente ordinava
+        aggiornaPrezzi: (prezzi) =>
+          setRighe((rr) => rr.map((r) => {
+            const nuovo = prezzi.find((x) => x.codice === r.p.codice);
+            return nuovo && nuovo.prezzo >= 1 && nuovo.prezzo <= 5000 ? { ...r, p: { ...r.p, prezzo: nuovo.prezzo } } : r;
+          })),
+        rimuovi: (codice) => setRighe((rr) => rr.filter((r) => r.p.codice !== codice)),
+      }}
+    >
       {children}
       {aperto && (
         <div className="carrello-sfondo" onClick={() => setAperto(false)}>
@@ -247,8 +307,25 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
               </ul>
             )}
 
+            {tolto && (
+              <div className="carrello-tolto" role="status">
+                <span>{t.carrello.tolto(tolto.riga.p.codice)}</span>
+                <button ref={annullaBtn} type="button" className="link" onClick={annulla}>
+                  {t.carrello.annulla}
+                </button>
+              </div>
+            )}
+
             {righe.length === 0 ? (
-              <p className="carrello-vuoto">{t.carrello.vuoto}</p>
+              <div className="carrello-vuoto">
+                <p>{t.carrello.vuoto}</p>
+                <Link className="btn btn--primary" href={percorso(lang, "/catalogo")} onClick={() => setAperto(false)}>
+                  {t.carrello.vaiCatalogo}
+                </Link>
+                <Link className="btn btn--ghost" href={percorso(lang, "/preordini")} onClick={() => setAperto(false)}>
+                  {t.carrello.vaiPreordini}
+                </Link>
+              </div>
             ) : (
               <>
                 <ul className="carrello-righe">
@@ -268,7 +345,7 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
                         {p.stato === "preordine" && p.uscita && <span className="uscita">{t.card.esce(giorno(p.uscita, lang))}</span>}
                       </div>
                       <div className="carrello-qta">
-                        <button type="button" aria-label={t.carrello.togli(p.codice)} onClick={() => cambia(p.codice, -1)}>
+                        <button type="button" aria-label={t.carrello.togli(p.codice)} onClick={() => (qta > 1 ? cambia(p.codice, -1) : togli(p.codice))}>
                           {qta > 1 ? <Minus size={16} strokeWidth={2.4} /> : <Trash2 size={16} strokeWidth={2.2} />}
                         </button>
                         <span aria-label={t.carrello.quantita(qta)}>{qta}</span>

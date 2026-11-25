@@ -14,6 +14,8 @@ export type Prodotto = {
   stato: Stato;
   uscita?: string; // data di uscita "2026-12-26", solo preordini
   immagine?: string; // link della foto
+  foto?: string[]; // tutte le foto, se nel foglio ce n'è più di una (la prima è "immagine")
+  descrizione?: { it?: string; en?: string }; // colonne facoltative "Descrizione" e "Descrizione EN"
 };
 
 

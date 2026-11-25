@@ -137,7 +137,9 @@ export function Footer({ lang }: { lang: Lingua }) {
         </div>
         <div className="legal">
           <span>{t.footer.legale}</span>
-          <span>{t.footer.condizioni}</span>
+          <span>
+            <Link href={p("/condizioni-di-vendita")}>{t.titoli.condizioni}</Link> · <Link href={p("/privacy")}>{t.titoli.privacy}</Link>
+          </span>
         </div>
       </div>
     </footer>

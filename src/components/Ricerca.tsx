@@ -5,19 +5,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { Prodotto } from "@/data/demo";
 import { useLingua } from "@/i18n/LinguaProvider";
+import Link from "next/link";
 import { euro, giorno } from "@/lib/format";
+import { classiStato as classi, linkProdotto } from "@/lib/prodotto";
+import { linkWhatsApp } from "@/lib/whatsapp";
 import { useCart } from "./CartProvider";
 
 // Ricerca: la lente in alto apre un pannello, i risultati compaiono mentre scrivi.
 // Cerca in tutto il foglio (catalogo, preordini, premi dei riscatti) per nome, codice, linea e categoria.
 // I sold out stanno in fondo.
-
-const classi = {
-  ordinazione: "badge--order",
-  preordine: "badge--pre",
-  riscatto: "badge--redeem",
-  soldout: "badge--sold",
-};
 
 // minuscole, senza accenti e senza trattini: "Pokémon BX-56" -> "pokemon bx 56"
 function pulito(s: string) {
@@ -72,7 +68,7 @@ export function Ricerca({ onApri }: { onApri: () => void }) {
     const tasti = (e: KeyboardEvent) => {
       if (e.key === "Escape") return setAperta(false);
       if (e.key !== "Tab" || !pannello.current) return;
-      const cliccabili = [...pannello.current.querySelectorAll<HTMLElement>("input, button:not([disabled])")];
+      const cliccabili = [...pannello.current.querySelectorAll<HTMLElement>("input, button:not([disabled]), a[href]")];
       const primo = cliccabili[0];
       const ultimo = cliccabili[cliccabili.length - 1];
       const fuori = !pannello.current.contains(document.activeElement);
@@ -137,6 +133,27 @@ export function Ricerca({ onApri }: { onApri: () => void }) {
             <p className="cerca-stato" id="cerca-stato" role="status">
               {stato}
             </p>
+            {/* niente risultati: lo chiede su WhatsApp con quello che aveva cercato */}
+            {!vuota && risultati.length === 0 && (
+              <div className="cerca-niente">
+                <p>{t.cerca.nonTrovi}</p>
+                <div className="cerca-niente-tasti">
+                  <a className="btn btn--primary btn--sm" href={linkWhatsApp(t.cerca.messaggio(domanda.trim()))} target="_blank" rel="noopener noreferrer">
+                    {t.cerca.chiedi}
+                  </a>
+                  <button
+                    className="btn btn--ghost btn--sm"
+                    type="button"
+                    onClick={() => {
+                      setDomanda("");
+                      campo.current?.focus();
+                    }}
+                  >
+                    {t.cerca.cancella}
+                  </button>
+                </div>
+              </div>
+            )}
             {risultati.length > 0 && (
               <ul className="cerca-righe">
                 {risultati.map(({ p, i }) => {
@@ -157,7 +174,11 @@ export function Ricerca({ onApri }: { onApri: () => void }) {
                         <span className="label">
                           {p.linea} · {p.codice}
                         </span>
-                        <strong>{p.nome}</strong>
+                        <strong>
+                          <Link href={linkProdotto(lang, p.codice)} onClick={() => setAperta(false)}>
+                            {p.nome}
+                          </Link>
+                        </strong>
                         <span className="cerca-info">
                           <span className={`badge ${classi[p.stato]}`}>{t.stati[p.stato]}</span>
                           {pre && <span className="uscita">{p.uscita ? t.card.esce(giorno(p.uscita, lang)) : t.card.daConfermare}</span>}

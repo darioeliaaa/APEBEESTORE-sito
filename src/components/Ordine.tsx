@@ -5,15 +5,21 @@ import { useEffect, useRef, useState } from "react";
 import type { Prodotto } from "@/data/demo";
 import { useLingua } from "@/i18n/LinguaProvider";
 import { percorso } from "@/i18n/testi";
+import { copia } from "@/lib/copia";
 import { euro, giorno } from "@/lib/format";
-import { linkWhatsApp } from "@/lib/whatsapp";
+import { NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
 import { useCart, type Riga } from "./CartProvider";
 
 // Pagina dell'ordine, in due passi:
-// 1) "Conferma l'ordine": il sito lo manda allo script di Nicholas (scheda Ordini + email) e riceve il numero ORD-...
+// 1) "Ordine con obbligo di pagamento": il sito lo manda allo script di Nicholas (scheda Ordini + email) e riceve il numero ORD-...
 // 2) "Invia su WhatsApp": si apre WhatsApp con il messaggio già scritto, per accordarsi sul pagamento.
 // Se il salvataggio non è attivo o non risponde, si passa comunque a WhatsApp con un codice creato dal sito.
 // Il messaggio è sempre in italiano, qualunque sia la lingua del sito.
+// Dopo la conferma la pagina "pronto" resta anche se il browser ricarica la scheda tornando da WhatsApp
+// (succede spesso sui telefoni): così il cliente non rifà l'ordine due volte.
+
+const MEMORIA_INVIATO = "apebeestore-ordine-inviato";
+type Inviato = { codice: string; link: string; testo: string; registrato: boolean };
 
 type Consegna = "ritiro" | "italia" | "europa" | "mondo";
 const costi: Record<Consegna, number> = { ritiro: 0, italia: 8, europa: 15, mondo: 50 };
@@ -104,20 +110,52 @@ function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean, reg
 }
 
 export function Ordine() {
-  const { righe, caricato, totale, apri, svuota } = useCart();
+  const { righe, caricato, totale, apri, svuota, aggiornaPrezzi, rimuovi } = useCart();
   const { lang, t } = useLingua();
   const o = t.ordine;
   const [d, setD] = useState<Dati>(vuoti);
   const [errori, setErrori] = useState<Partial<Record<keyof Dati, string>>>({});
   const [codice, setCodice] = useState("");
-  const [inviato, setInviato] = useState<{ codice: string; link: string; registrato: boolean } | null>(null);
+  const [inviato, setInviato] = useState<Inviato | null>(null);
   const [invio, setInvio] = useState(false);
   const [erroreServer, setErroreServer] = useState("");
+  // prezzi cambiati mentre ordinava: codice -> prezzo che aveva visto
+  const [prima, setPrima] = useState<Record<string, number>>({});
+  // prodotto appena finito sold out o tolto dal catalogo
+  const [daTogliere, setDaTogliere] = useState("");
+  const [offline, setOffline] = useState(false);
+  const [copiato, setCopiato] = useState(false);
   const trappola = useRef<HTMLInputElement>(null);
   const modulo = useRef<HTMLFormElement>(null);
 
   // il codice si crea nel browser, così è diverso per ogni ordine
   useEffect(() => setCodice(nuovoCodice()), []);
+
+  // senza connessione lo dico subito, e i dati scritti restano
+  useEffect(() => {
+    const aggiorna = () => {
+      setOffline(!navigator.onLine);
+      // tornata la connessione, il messaggio "sei offline" non serve più
+      if (navigator.onLine) setErroreServer((e) => (e === o.offline ? "" : e));
+    };
+    aggiorna();
+    window.addEventListener("online", aggiorna);
+    window.addEventListener("offline", aggiorna);
+    return () => {
+      window.removeEventListener("online", aggiorna);
+      window.removeEventListener("offline", aggiorna);
+    };
+  }, [o.offline]);
+
+  // tornando da WhatsApp con la pagina ricaricata: se il carrello è vuoto rimostro l'ordine appena inviato
+  useEffect(() => {
+    if (!caricato || inviato) return;
+    try {
+      const salvato = JSON.parse(sessionStorage.getItem(MEMORIA_INVIATO) ?? "null");
+      if (salvato && !righe.length && Date.now() - salvato.quando < 6 * 60 * 60 * 1000) setInviato(salvato.inviato);
+      else if (righe.length) sessionStorage.removeItem(MEMORIA_INVIATO);
+    } catch {}
+  }, [caricato]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const imposta = <K extends keyof Dati>(k: K, v: Dati[K]) => {
     setD((x) => ({ ...x, [k]: v }));
@@ -165,7 +203,12 @@ export function Ordine() {
       modulo.current?.querySelector<HTMLElement>(`[name="${primo}"]`)?.focus();
       return;
     }
+    if (!navigator.onLine) {
+      setErroreServer(o.offline);
+      return;
+    }
     setInvio(true);
+    setDaTogliere("");
     let numero = "";
     let totaleScript: number | undefined;
     try {
@@ -173,7 +216,8 @@ export function Ordine() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          righe: righe.map((r) => ({ codice: r.p.codice, qta: r.qta })),
+          // anche il prezzo che il cliente sta vedendo: se nel frattempo è cambiato, il server lo dice
+          righe: righe.map((r) => ({ codice: r.p.codice, qta: r.qta, prezzo: r.p.prezzo })),
           dati: d,
           lingua: lang,
           sito: trappola.current?.value ?? "",
@@ -184,21 +228,33 @@ export function Ordine() {
         numero = r.numero;
         totaleScript = r.totale;
       } else if (res.status !== 503) {
-        // l'ordine non va bene (es. un prodotto è appena finito sold out): lo dico e non vado avanti
+        // l'ordine non va bene: lo dico e non vado avanti
+        if (Array.isArray(r.prezzi)) {
+          // prezzi cambiati: aggiorno il carrello, segno i vecchi prezzi e il cliente conferma di nuovo
+          aggiornaPrezzi(r.prezzi);
+          setPrima((x) => ({ ...x, ...Object.fromEntries(r.prezzi.map((c: { codice: string; prima: number }) => [c.codice, x[c.codice] ?? c.prima])) }));
+        }
+        if (typeof r.togli === "string") setDaTogliere(r.togli);
         setErroreServer(r.errore ?? o.erroreGenerico);
         setInvio(false);
         return;
       }
     } catch {
-      // senza rete o script che non risponde: si va comunque su WhatsApp
+      // senza rete: i dati restano e si riprova; con la rete ma lo script che non risponde si va comunque su WhatsApp
+      if (!navigator.onLine) {
+        setErroreServer(o.offline);
+        setInvio(false);
+        return;
+      }
     }
     const registrato = !!numero;
     const codiceFinale = numero || codice;
-    setInviato({
-      codice: codiceFinale,
-      registrato,
-      link: linkWhatsApp(messaggio(codiceFinale, righe, d, lang === "en", registrato, totaleScript)),
-    });
+    const testo = messaggio(codiceFinale, righe, d, lang === "en", registrato, totaleScript);
+    const pronto = { codice: codiceFinale, registrato, testo, link: linkWhatsApp(testo) };
+    setInviato(pronto);
+    try {
+      sessionStorage.setItem(MEMORIA_INVIATO, JSON.stringify({ quando: Date.now(), inviato: pronto }));
+    } catch {}
     svuota();
     setInvio(false);
     window.scrollTo({ top: 0 });
@@ -213,7 +269,34 @@ export function Ordine() {
         <a className="btn btn--primary ordine-invia" href={inviato.link} target="_blank" rel="noopener noreferrer">
           {o.apriWhatsApp}
         </a>
-        <Link className="link" href={percorso(lang, "/catalogo")}>
+        {/* se WhatsApp non si apre: il messaggio si copia e si manda a mano al numero scritto per intero */}
+        <div className="ordine-a-mano">
+          <button
+            className="btn btn--ghost btn--sm"
+            type="button"
+            onClick={async () => {
+              if (await copia(inviato.testo)) {
+                setCopiato(true);
+                setTimeout(() => setCopiato(false), 2500);
+              }
+            }}
+          >
+            {copiato ? o.copiato : o.copia}
+          </button>
+          <p>{o.aMano(NUMERO_LEGGIBILE.replace(/ /g, "\u00a0"))}</p>
+          <span className="sr-only" role="status">
+            {copiato ? o.copiato : ""}
+          </span>
+        </div>
+        <Link
+          className="link"
+          href={percorso(lang, "/catalogo")}
+          onClick={() => {
+            try {
+              sessionStorage.removeItem(MEMORIA_INVIATO);
+            } catch {}
+          }}
+        >
           {o.continua}
         </Link>
       </div>
@@ -255,7 +338,7 @@ export function Ordine() {
         <h2>{o.riepilogo}</h2>
         <ul>
           {righe.map(({ p, qta }) => (
-            <li key={p.codice}>
+            <li key={p.codice} className={prima[p.codice] !== undefined && prima[p.codice] !== p.prezzo ? "ordine-cambiato" : undefined}>
               <span className={`carrello-foto${p.immagine ? "" : " carrello-foto--vuota"}`} aria-hidden="true">
                 {p.immagine ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -271,7 +354,12 @@ export function Ordine() {
                 </span>
                 {p.stato === "preordine" && p.uscita && <span className="uscita">{t.card.esce(giorno(p.uscita, lang))}</span>}
               </span>
-              <span className="ordine-prezzo">{euro(p.prezzo * qta, lang)}</span>
+              <span className="ordine-prezzo">
+                {euro(p.prezzo * qta, lang)}
+                {prima[p.codice] !== undefined && prima[p.codice] !== p.prezzo && (
+                  <s className="ordine-prima">{o.prima(euro(prima[p.codice] * qta, lang))}</s>
+                )}
+              </span>
             </li>
           ))}
         </ul>
@@ -361,7 +449,18 @@ export function Ordine() {
 
         <label className={`spunta${errori.accetto ? " campo--errore" : ""}`}>
           <input type="checkbox" name="accetto" checked={d.accetto} onChange={(e) => imposta("accetto", e.target.checked)} />
-          <span>{o.accetto}</span>
+          {/* i link si aprono in un'altra scheda, così i dati scritti qui non si perdono */}
+          <span>
+            {o.accetto[0]}
+            <a href={percorso(lang, "/condizioni-di-vendita")} target="_blank" rel="noopener">
+              {o.accetto[1]}
+            </a>
+            {o.accetto[2]}
+            <a href={percorso(lang, "/privacy")} target="_blank" rel="noopener">
+              {o.accetto[3]}
+            </a>
+            {o.accetto[4]}
+          </span>
           {errori.accetto && <em>{errori.accetto}</em>}
         </label>
 
@@ -371,10 +470,29 @@ export function Ordine() {
           </p>
         )}
 
-        {erroreServer && (
-          <p className="ordine-errori" role="alert">
-            {erroreServer}
+        {offline && !erroreServer && (
+          <p className="ordine-errori" role="status">
+            {o.offline}
           </p>
+        )}
+
+        {erroreServer && (
+          <div className="ordine-errori" role="alert">
+            <p>{erroreServer}</p>
+            {daTogliere && righe.some((r) => r.p.codice === daTogliere) && (
+              <button
+                type="button"
+                className="link"
+                onClick={() => {
+                  rimuovi(daTogliere);
+                  setDaTogliere("");
+                  setErroreServer("");
+                }}
+              >
+                {o.togliCodice(daTogliere)}
+              </button>
+            )}
+          </div>
         )}
 
         {/* campo nascosto contro lo spam: le persone non lo vedono */}

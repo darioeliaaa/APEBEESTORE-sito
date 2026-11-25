@@ -34,6 +34,20 @@ Le foto del banner in home si prendono dalla scheda **BANNER** dello stesso Goog
 
 Con una foto il banner sta fermo, con due o più scorrono da sole. Le foto ideali sono quadrate (1080×1080); le altre si vedono intere con i lati riempiti dalla stessa foto sfocata. Se la scheda non c'è o è vuota, in home resta il disegno con l'ape.
 
+## Recensioni
+Le recensioni della pagina Recensioni si prendono dalla scheda **RECENSIONI** dello stesso Google Sheet (una riga = una recensione). Le colonne si riconoscono dal nome, l'ordine non conta:
+
+| Screenshot | Frase | Nome | Città | Prodotto | Data | Attivo |
+|---|---|---|---|---|---|---|
+| link della foto della chat (`https://`, anche Google Drive) | il messaggio del cliente, parola per parola | sul sito si vede solo nome e iniziale del cognome | facoltativa | facoltativo, il codice (es. `BX-46`): diventa il link al prodotto | facoltativa | facoltativo: senza spunta non si vede |
+
+Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: per data se c'è, altrimenti le righe più in basso vengono prima. Se la scheda non c'è, la pagina mostra solo il link a Instagram. Gli errori (link sbagliati, date scritte male) si vedono nella pagina `/controllo`.
+
+## Pagina prodotto
+- Ogni prodotto ha la sua pagina: `/prodotto/bx-46` (si apre dalle card e dalla ricerca).
+- Nella colonna Immagine si possono mettere più foto, separate da virgola o a capo: la prima è quella della card, le altre compaiono come miniature.
+- Colonne facoltative **Descrizione** e **Descrizione EN**: se ci sono, il testo compare sotto il prezzo.
+
 ## Catalogo diviso per linea
 - Ogni linea della colonna "Linea" del foglio (Beyblade X, Pokémon...) ha la sua pagina: `/catalogo/beyblade-x`, `/catalogo/pokemon`. `/catalogo` mostra le linee da scegliere.
 - Nell'header "Catalogo" è un menu a tendina con le linee; sul telefono si apre dentro il menu.
