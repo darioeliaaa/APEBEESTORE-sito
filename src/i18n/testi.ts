@@ -233,8 +233,10 @@ const it = {
     codiceAppAiuto: "Il codice che sblocca il premio: lo controlliamo e te lo confermiamo su WhatsApp.",
     note: "Note per noi (facoltativo)",
     accetto: "Ho letto le condizioni di vendita e la privacy",
-    invia: "Invia l'ordine su WhatsApp",
-    aiutoInvio: "Si apre WhatsApp con il messaggio già scritto: devi solo premere invia. Il pagamento lo concordiamo lì.",
+    invia: "Conferma l'ordine",
+    invio: "Conferma in corso…",
+    aiutoInvio: "Confermando, l'ordine viene registrato e ti arriva un'email di riepilogo. Poi ce lo mandi su WhatsApp e lì ci accordiamo sul pagamento.",
+    erroreGenerico: "Non siamo riusciti a confermare l'ordine. Riprova tra poco.",
     errori: {
       obbligatorio: "Campo obbligatorio",
       email: "Email non valida",
@@ -243,10 +245,13 @@ const it = {
       accetto: "Serve la spunta per continuare",
       controlla: "Controlla i campi segnati in rosso.",
     },
-    pronto: "Ordine pronto",
+    pronto: "Ordine confermato",
     prontoTesto: (codice: string) =>
-      `Il messaggio con l'ordine ${codice} è pronto su WhatsApp: premi invia per mandarcelo. Ti rispondiamo lì per il pagamento.`,
-    riapri: "WhatsApp non si è aperto? Tocca qui",
+      `Il tuo ordine ${codice} è registrato e ti abbiamo mandato un'email di riepilogo. Ultimo passo: mandacelo su WhatsApp, lì ci accordiamo sul pagamento.`,
+    prontoSenzaFoglio: "Ultimo passo",
+    prontoTestoSenzaFoglio: (codice: string) =>
+      `Manda l'ordine ${codice} su WhatsApp con il messaggio già scritto: lì ci accordiamo sul pagamento.`,
+    apriWhatsApp: "Invia su WhatsApp",
     continua: "Continua a guardare",
   },
   nonTrovata: {
@@ -481,8 +486,10 @@ const en: Testi = {
     codiceAppAiuto: "The code that unlocks the prize: we check it and confirm it with you on WhatsApp.",
     note: "Notes for us (optional)",
     accetto: "I have read the terms of sale and the privacy policy",
-    invia: "Send the order on WhatsApp",
-    aiutoInvio: "WhatsApp opens with the message already written: just press send. We arrange the payment there.",
+    invia: "Confirm order",
+    invio: "Confirming…",
+    aiutoInvio: "When you confirm, your order is registered and you get a summary email. Then you send it to us on WhatsApp and we arrange the payment there.",
+    erroreGenerico: "We couldn't confirm your order. Please try again shortly.",
     errori: {
       obbligatorio: "Required",
       email: "Invalid email",
@@ -491,10 +498,13 @@ const en: Testi = {
       accetto: "Please tick the box to continue",
       controlla: "Please check the fields marked in red.",
     },
-    pronto: "Order ready",
+    pronto: "Order confirmed",
     prontoTesto: (codice: string) =>
-      `The message with order ${codice} is ready on WhatsApp: press send to get it to us. We'll reply there about the payment.`,
-    riapri: "WhatsApp didn't open? Tap here",
+      `Your order ${codice} is registered and we've sent you a summary email. Last step: send it to us on WhatsApp and we'll arrange the payment there.`,
+    prontoSenzaFoglio: "Last step",
+    prontoTestoSenzaFoglio: (codice: string) =>
+      `Send order ${codice} on WhatsApp with the message already written: we'll arrange the payment there.`,
+    apriWhatsApp: "Send on WhatsApp",
     continua: "Keep browsing",
   },
   nonTrovata: {

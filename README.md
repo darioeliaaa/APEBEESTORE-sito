@@ -39,6 +39,13 @@ Con una foto il banner sta fermo, con due o più scorrono da sole. Le foto ideal
 - Nell'header "Catalogo" è un menu a tendina con le linee; sul telefono si apre dentro il menu.
 - Una linea nuova nel foglio compare da sola, nel menu e nel catalogo. Maiuscole e accenti non contano: "pokemon" e "Pokémon" sono la stessa linea.
 
+## Ordini
+- Carrello → `/ordine` (dati del cliente) → **Conferma l'ordine**: il sito manda l'ordine allo script di Nicholas (`/api/ordine`), che lo salva nella scheda Ordini del foglio, manda le email e risponde con il numero ORD-….
+- Poi il tasto **Invia su WhatsApp** apre la chat con Nicholas con il messaggio già scritto, per il pagamento.
+- Variabili: `ORDINI_URL` (URL `/exec` dello script) e `ORDINI_SEGRETO` (uguale alla proprietà `SITO_SEGRETO` dello script). Se mancano o lo script non risponde, l'ordine va comunque su WhatsApp con un codice APE-….
+- Il link "riepilogo" nelle email porta a `/riepilogo?order=…&t=…`, che legge l'ordine dallo script.
+- Come pubblicare lo script: `../script-sito/COME-PUBBLICARE.md`.
+
 ## Lingue
 Il sito è in italiano e in inglese. L'italiano sta agli indirizzi di sempre (`/catalogo`), l'inglese sotto `/en` (`/en/catalogo`).
 - Tutti i testi sono in `src/i18n/testi.ts` (le FAQ in `src/i18n/faq.ts`, Chi siamo in `src/pagine/ChiSiamo.tsx`): per cambiare una frase si cambia lì, in tutte e due le lingue.

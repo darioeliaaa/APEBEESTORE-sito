@@ -9,7 +9,10 @@ import { euro, giorno } from "@/lib/format";
 import { linkWhatsApp } from "@/lib/whatsapp";
 import { useCart, type Riga } from "./CartProvider";
 
-// Pagina dell'ordine: dati del cliente e tasto che apre WhatsApp con il messaggio già scritto per Nicholas.
+// Pagina dell'ordine, in due passi:
+// 1) "Conferma l'ordine": il sito lo manda allo script di Nicholas (scheda Ordini + email) e riceve il numero ORD-...
+// 2) "Invia su WhatsApp": si apre WhatsApp con il messaggio già scritto, per accordarsi sul pagamento.
+// Se il salvataggio non è attivo o non risponde, si passa comunque a WhatsApp con un codice creato dal sito.
 // Il messaggio è sempre in italiano, qualunque sia la lingua del sito.
 
 type Consegna = "ritiro" | "italia" | "europa" | "mondo";
@@ -65,7 +68,7 @@ const nomeProdotto = (p: Prodotto) => (p.nome === p.codice ? p.codice : `${p.cod
 const euroIt = (n: number) => euro(n, "it");
 const dataIt = (iso: string) => iso.split("-").reverse().join("/");
 
-function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean) {
+function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean, registrato: boolean, totaleScript?: number) {
   const prodotti = righe.reduce((n, r) => n + r.p.prezzo * r.qta, 0);
   const consegna = costi[d.consegna];
   const righeProdotti = righe.map(({ p, qta }) => {
@@ -87,7 +90,7 @@ function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean) {
     ...righeProdotti,
     "",
     `Consegna: ${nomiConsegna[d.consegna]} (${consegna ? euroIt(consegna) : "gratis"})`,
-    `Totale: ${euroIt(prodotti + consegna)}`,
+    `Totale: ${euroIt(totaleScript ?? prodotti + consegna)}`,
     "",
     "CLIENTE",
     `Nome: ${d.nome.trim()}`,
@@ -96,6 +99,7 @@ function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean) {
     dove,
     ...(d.note.trim() ? ["", `Note: ${d.note.trim()}`] : []),
     ...(inglese ? ["", "(Il cliente ha ordinato dal sito in inglese)"] : []),
+    ...(registrato ? [] : ["", "(Attenzione: questo ordine non è stato salvato nel foglio)"]),
   ].join("\n");
 }
 
@@ -106,7 +110,10 @@ export function Ordine() {
   const [d, setD] = useState<Dati>(vuoti);
   const [errori, setErrori] = useState<Partial<Record<keyof Dati, string>>>({});
   const [codice, setCodice] = useState("");
-  const [inviato, setInviato] = useState<{ codice: string; link: string } | null>(null);
+  const [inviato, setInviato] = useState<{ codice: string; link: string; registrato: boolean } | null>(null);
+  const [invio, setInvio] = useState(false);
+  const [erroreServer, setErroreServer] = useState("");
+  const trappola = useRef<HTMLInputElement>(null);
   const modulo = useRef<HTMLFormElement>(null);
 
   // il codice si crea nel browser, così è diverso per ogni ordine
@@ -122,7 +129,6 @@ export function Ordine() {
   const spedizione = d.consegna !== "ritiro";
   const conRiscatto = righe.some((r) => r.p.stato === "riscatto");
   const costoConsegna = costi[d.consegna];
-  const link = linkWhatsApp(messaggio(codice, righe, d, lang === "en"));
 
   function controlla() {
     const e: Partial<Record<keyof Dati, string>> = {};
@@ -149,18 +155,52 @@ export function Ordine() {
     return e;
   }
 
-  function invia(ev: React.MouseEvent<HTMLAnchorElement>) {
+  async function conferma() {
+    if (invio) return;
+    setErroreServer("");
     const e = controlla();
     if (Object.keys(e).length) {
-      ev.preventDefault();
       // porto il cursore sul primo campo sbagliato
       const primo = Object.keys(e)[0];
       modulo.current?.querySelector<HTMLElement>(`[name="${primo}"]`)?.focus();
       return;
     }
-    // il link si apre da solo (scheda nuova o app di WhatsApp); il carrello si svuota subito
-    setInviato({ codice, link });
+    setInvio(true);
+    let numero = "";
+    let totaleScript: number | undefined;
+    try {
+      const res = await fetch("/api/ordine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          righe: righe.map((r) => ({ codice: r.p.codice, qta: r.qta })),
+          dati: d,
+          lingua: lang,
+          sito: trappola.current?.value ?? "",
+        }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (res.ok) {
+        numero = r.numero;
+        totaleScript = r.totale;
+      } else if (res.status !== 503) {
+        // l'ordine non va bene (es. un prodotto è appena finito sold out): lo dico e non vado avanti
+        setErroreServer(r.errore ?? o.erroreGenerico);
+        setInvio(false);
+        return;
+      }
+    } catch {
+      // senza rete o script che non risponde: si va comunque su WhatsApp
+    }
+    const registrato = !!numero;
+    const codiceFinale = numero || codice;
+    setInviato({
+      codice: codiceFinale,
+      registrato,
+      link: linkWhatsApp(messaggio(codiceFinale, righe, d, lang === "en", registrato, totaleScript)),
+    });
     svuota();
+    setInvio(false);
     window.scrollTo({ top: 0 });
   }
 
@@ -168,12 +208,12 @@ export function Ordine() {
     return (
       <div className="ordine-pronto">
         <span className="label">{inviato.codice}</span>
-        <h2>{o.pronto}</h2>
-        <p>{o.prontoTesto(inviato.codice)}</p>
-        <a className="link" href={inviato.link} target="_blank" rel="noopener noreferrer">
-          {o.riapri}
+        <h2>{inviato.registrato ? o.pronto : o.prontoSenzaFoglio}</h2>
+        <p>{inviato.registrato ? o.prontoTesto(inviato.codice) : o.prontoTestoSenzaFoglio(inviato.codice)}</p>
+        <a className="btn btn--primary ordine-invia" href={inviato.link} target="_blank" rel="noopener noreferrer">
+          {o.apriWhatsApp}
         </a>
-        <Link className="btn btn--primary" href={percorso(lang, "/catalogo")}>
+        <Link className="link" href={percorso(lang, "/catalogo")}>
           {o.continua}
         </Link>
       </div>
@@ -331,9 +371,18 @@ export function Ordine() {
           </p>
         )}
 
-        <a className="btn btn--primary ordine-invia" href={link} target="_blank" rel="noopener noreferrer" onClick={invia}>
-          {o.invia}
-        </a>
+        {erroreServer && (
+          <p className="ordine-errori" role="alert">
+            {erroreServer}
+          </p>
+        )}
+
+        {/* campo nascosto contro lo spam: le persone non lo vedono */}
+        <input ref={trappola} className="trappola" type="text" name="sito" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+
+        <button className="btn btn--primary ordine-invia" type="button" onClick={conferma} disabled={invio} aria-busy={invio}>
+          {invio ? o.invio : o.invia}
+        </button>
         <p className="campo-aiuto">{o.aiutoInvio}</p>
       </form>
     </div>
