@@ -41,9 +41,9 @@ export function Hero({ lang, foto }: { lang: Lingua; foto: FotoBanner[] }) {
   );
 }
 
-export function PageHead({ label, titolo, testo, stretto }: { label: string; titolo: string; testo?: string; stretto?: boolean }) {
+export function PageHead({ label, titolo, testo, stretto, centro }: { label: string; titolo: string; testo?: string; stretto?: boolean; centro?: boolean }) {
   return (
-    <section className="page-head">
+    <section className={centro ? "page-head page-head--centro" : "page-head"}>
       <div className={stretto ? "wrap narrow" : "wrap"}>
         <span className="label">{label}</span>
         <h1>{titolo}</h1>

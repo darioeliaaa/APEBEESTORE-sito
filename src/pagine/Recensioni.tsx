@@ -29,8 +29,9 @@ export async function Recensioni({ lang }: { lang: Lingua }) {
 
   return (
     <>
-      <PageHead label={t.label} titolo={t.titolo} testo={t.testo} />
-      <section className="block block--top">
+      {/* pagina tutta centrata: titolo, tasti, modulo e recensioni */}
+      <PageHead label={t.label} titolo={t.titolo} testo={t.testo} centro />
+      <section className="block block--top recensioni-pagina">
         <div className="wrap">
           <div className="recensioni-link">
             <a className="btn btn--ghost" href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">
