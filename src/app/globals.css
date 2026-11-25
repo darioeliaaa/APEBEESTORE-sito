@@ -419,7 +419,12 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
 .page-head--centro .wrap { align-items: center; text-align: center; }
 .page-head--centro p { margin-inline: auto; }
 .recensioni-pagina .wrap { align-items: center; }
-.recensioni-link { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.recensioni-link { display: grid; grid-template-columns: repeat(2, minmax(0, 340px)); justify-content: center; gap: 24px; width: 100%; }
+.recensioni-fonte { display: flex; flex-direction: column; gap: 12px; text-decoration: none; color: inherit; }
+.recensioni-fonte img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: top; border: 1px solid var(--line); background: var(--surface-raised); transition: transform .12s ease, box-shadow .12s ease; }
+.recensioni-fonte .btn { width: 100%; flex: 1; text-align: center; } /* i due tasti alti uguali anche se un testo va a capo */
+.recensioni-fonte:hover img { transform: translate(-2px, -2px); box-shadow: var(--shadow-hard); }
+.recensioni-fonte:hover .btn { background: var(--ink); color: var(--surface); }
 .recensioni-pagina .scrivi-recensione { width: 100%; }
 .recensioni-elenco { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .recensioni-elenco h2 { font: 900 clamp(26px, 3.6vw, 36px)/1.1 var(--font-display); text-transform: uppercase; text-align: center; }
@@ -637,7 +642,10 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
   .recensione { padding: 12px; }
   .scrivi-recensione { padding: 20px 16px; }
   .scrivi-recensione .btn { align-self: stretch; }
-  .recensioni-link .btn { flex: 1 1 100%; }
+  /* sul telefono le due schede restano affiancate, più piccole */
+  .recensioni-link { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .recensioni-fonte { gap: 8px; }
+  .recensioni-fonte .btn { padding: 10px 6px; font-size: 11px; line-height: 14px; letter-spacing: .04em; }
   .linee { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .campi-2, .campi-3, .scelte { grid-template-columns: minmax(0, 1fr); }
   .ordine-riepilogo { padding: 18px; }
@@ -680,7 +688,8 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
   .cerca-azione { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn, .card, .toast { transition: none; }
+  .btn, .card, .toast, .recensioni-fonte img { transition: none; }
+  .recensioni-fonte:hover img { transform: none; }
   .btn:hover, .card:hover { transform: none; }
   .hero-art .bee { animation: none; }
   .banner-dot span { transition: none; }

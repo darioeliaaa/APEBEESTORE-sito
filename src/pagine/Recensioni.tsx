@@ -33,12 +33,17 @@ export async function Recensioni({ lang }: { lang: Lingua }) {
       <PageHead label={t.label} titolo={t.titolo} testo={t.testo} centro />
       <section className="block block--top recensioni-pagina">
         <div className="wrap">
+          {/* sopra ogni tasto lo screenshot di dove si trovano i feedback; tutta la scheda è il link */}
           <div className="recensioni-link">
-            <a className="btn btn--ghost" href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">
-              {t.instagram}
+            <a className="recensioni-fonte" href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/recensioni/instagram.jpg" alt={t.fotoInstagram} width={1000} height={1560} loading="lazy" />
+              <span className="btn btn--ghost">{t.instagram}</span>
             </a>
-            <a className="btn btn--ghost" href={COMMUNITY} target="_blank" rel="noopener noreferrer">
-              {t.whatsapp}
+            <a className="recensioni-fonte" href={COMMUNITY} target="_blank" rel="noopener noreferrer">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/recensioni/community.jpg" alt={t.fotoWhatsapp} width={674} height={1408} loading="lazy" />
+              <span className="btn btn--ghost">{t.whatsapp}</span>
             </a>
           </div>
 
