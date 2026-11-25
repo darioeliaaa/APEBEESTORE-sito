@@ -1,10 +1,11 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Minus, Plus, Trash2, X } from "lucide-react";
 import type { Prodotto } from "@/data/demo";
 import { useLingua } from "@/i18n/LinguaProvider";
-import { testi, type Lingua } from "@/i18n/testi";
+import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { euro, giorno } from "@/lib/format";
 
 // Carrello.
@@ -13,12 +14,16 @@ import { euro, giorno } from "@/lib/format";
 // I preordini tra loro solo se hanno la stessa data.
 // I testi (anche i messaggi) sono nel dizionario src/i18n/testi.ts.
 
-type Riga = { p: Prodotto; qta: number };
+export type Riga = { p: Prodotto; qta: number };
 
 type CartContextValue = {
+  righe: Riga[];
+  caricato: boolean; // false finché il carrello salvato nel browser non è stato letto
   count: number;
+  totale: number;
   add: (p: Prodotto) => void;
   apri: () => void;
+  svuota: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -214,7 +219,7 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
   const totale = righe.reduce((n, r) => n + r.p.prezzo * r.qta, 0);
 
   return (
-    <CartContext.Provider value={{ count, add, apri: () => setAperto(true) }}>
+    <CartContext.Provider value={{ righe, caricato, count, totale, add, apri: () => setAperto(true), svuota: () => setRighe([]) }}>
       {children}
       {aperto && (
         <div className="carrello-sfondo" onClick={() => setAperto(false)}>
@@ -248,6 +253,14 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
                 <ul className="carrello-righe">
                   {righe.map(({ p, qta }) => (
                     <li key={p.codice}>
+                      <span className={`carrello-foto${p.immagine ? "" : " carrello-foto--vuota"}`} aria-hidden="true">
+                        {p.immagine ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.immagine} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                        ) : (
+                          p.codice
+                        )}
+                      </span>
                       <div className="carrello-nome">
                         <span className="label">{p.codice}</span>
                         <strong>{p.nome}</strong>
@@ -277,10 +290,9 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
                     <strong>{euro(totale, lang)}</strong>
                   </div>
                   <span className="incl">{t.carrello.incluse}</span>
-                  <button className="btn btn--primary" type="button" disabled>
+                  <Link className="btn btn--primary" href={percorso(lang, "/ordine")} onClick={() => setAperto(false)}>
                     {t.carrello.concludi}
-                  </button>
-                  <span className="carrello-nota">{t.carrello.presto}</span>
+                  </Link>
                 </div>
               </>
             )}

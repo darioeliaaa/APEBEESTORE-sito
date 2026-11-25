@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { percorso, testi, type Lingua } from "@/i18n/testi";
 import type { FotoBanner } from "@/lib/sheet";
+import { linkWhatsApp } from "@/lib/whatsapp";
 import { Banner } from "./Banner";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
@@ -129,7 +130,7 @@ export function Footer({ lang }: { lang: Lingua }) {
         <div>
           <h3>{t.footer.contatti}</h3>
           <ul>
-            <li><a href="#">WhatsApp</a></li>
+            <li><a href={linkWhatsApp()} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
             <li><a href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">Instagram</a></li>
             <li><a href="https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue" target="_blank" rel="noopener noreferrer">Community</a></li>
           </ul>

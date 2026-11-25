@@ -81,7 +81,12 @@ export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
   // tendina del catalogo aperta: si chiude con Esc o cliccando fuori
   useEffect(() => {
     if (!tendina) return;
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && setTendina(false);
+    // con Esc il cursore della tastiera torna su "Catalogo"
+    const esc = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setTendina(false);
+      voceCatalogo.current?.querySelector("button")?.focus();
+    };
     const fuori = (e: PointerEvent) => {
       if (voceCatalogo.current && !voceCatalogo.current.contains(e.target as Node)) setTendina(false);
     };
@@ -142,7 +147,14 @@ export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
           <Image className="logo-white" src="/brand/logo-orizzontale.png" alt="APEBEESTORE" width={736} height={188} priority />
         </Link>
         <nav className={`nav${aperto ? " open" : ""}`} id="menu" aria-label={t.header.menu} ref={menu}>
-          <div className="voce-tendina" ref={voceCatalogo}>
+          <div
+            className="voce-tendina"
+            ref={voceCatalogo}
+            onBlur={(e) => {
+              // uscendo dalla tendina con Tab si chiude
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) setTendina(false);
+            }}
+          >
             <button
               type="button"
               aria-expanded={tendina}
