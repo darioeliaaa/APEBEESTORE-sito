@@ -3,21 +3,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Menu, Search, ShoppingBag, SunMoon, X } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Menu, ShoppingBag, SunMoon, X } from "lucide-react";
+import { useLingua } from "@/i18n/LinguaProvider";
+import { inLingua, percorso, testi, type Lingua } from "@/i18n/testi";
 import { useCart } from "./CartProvider";
 
+// la ricerca la aggiungiamo più avanti
+
 const negozio = [
-  { href: "/catalogo", label: "Catalogo" },
-  { href: "/preordini", label: "Preordini" },
-  { href: "/riscatti", label: "Riscatti app" },
-  { href: "/recensioni", label: "Recensioni" },
-];
+  { href: "/catalogo", voce: "catalogo" },
+  { href: "/preordini", voce: "preordini" },
+  { href: "/riscatti", voce: "riscatti" },
+  { href: "/recensioni", voce: "recensioni" },
+] as const;
 
 const info = [
-  { href: "/faq", label: "FAQ" },
-  { href: "/chi-siamo", label: "Chi siamo" },
-];
+  { href: "/faq", voce: "faq" },
+  { href: "/chi-siamo", voce: "chiSiamo" },
+] as const;
 
 function toggleTheme() {
   const root = document.documentElement;
@@ -30,50 +34,113 @@ function toggleTheme() {
   } catch {}
 }
 
+// IT / EN: porta alla stessa pagina nell'altra lingua, tenendo anche i filtri del catalogo (?ordine=...)
+function Lingue({ className }: { className: string }) {
+  const { lang, t } = useLingua();
+  const pathname = usePathname();
+  return (
+    <div className={className} role="group" aria-label={t.header.lingua}>
+      {(["it", "en"] as Lingua[]).map((l, i) => (
+        <Fragment key={l}>
+          {i > 0 && <span aria-hidden="true">/</span>}
+          <a
+            href={inLingua(pathname, l)}
+            hrefLang={l}
+            lang={l}
+            aria-label={testi[l].nome}
+            aria-current={l === lang ? "true" : undefined}
+            onClick={(e) => {
+              if (l === lang) return e.preventDefault();
+              e.preventDefault();
+              window.location.href = inLingua(window.location.pathname, l) + window.location.search + window.location.hash;
+            }}
+          >
+            {testi[l].sigla}
+          </a>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
 export function Header() {
   const { count, apri } = useCart();
+  const { lang, t } = useLingua();
   const pathname = usePathname();
   const [aperto, setAperto] = useState(false);
+  const testata = useRef<HTMLElement>(null);
+  const menu = useRef<HTMLElement>(null);
 
   useEffect(() => setAperto(false), [pathname]);
 
+  // menu del telefono aperto: si chiude con Esc, toccando fuori o allargando la finestra,
+  // la pagina sotto non scorre e il menu non va oltre lo schermo
+  useEffect(() => {
+    if (!aperto) return;
+    const chiudi = () => setAperto(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && chiudi();
+    const fuori = (e: PointerEvent) => {
+      if (testata.current && !testata.current.contains(e.target as Node)) chiudi();
+    };
+    const largo = window.matchMedia("(min-width: 1101px)");
+    const nav = menu.current;
+    if (nav && testata.current) nav.style.maxHeight = `${window.innerHeight - testata.current.getBoundingClientRect().bottom}px`;
+    document.addEventListener("keydown", esc);
+    document.addEventListener("pointerdown", fuori);
+    largo.addEventListener("change", chiudi);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", esc);
+      document.removeEventListener("pointerdown", fuori);
+      largo.removeEventListener("change", chiudi);
+      document.body.style.overflow = "";
+      if (nav) nav.style.maxHeight = "";
+    };
+  }, [aperto]);
+
+  // toccando una voce il menu si chiude, anche se è la pagina in cui sei già
+  const voce = (l: { href: string; voce: keyof typeof t.nav }, cls?: string) => {
+    const href = percorso(lang, l.href);
+    return (
+      <Link key={l.href} className={cls} href={href} aria-current={pathname === href ? "page" : undefined} onClick={() => setAperto(false)}>
+        {t.nav[l.voce]}
+      </Link>
+    );
+  };
+
   return (
-    <header className="top">
+    <header className="top" ref={testata}>
       <div className="wrap">
-        <Link className="logo" href="/" aria-label="APEBEESTORE, home">
+        <Link className="logo" href={percorso(lang, "/")} aria-label={t.header.home} onClick={() => setAperto(false)}>
           <Image className="logo-white" src="/brand/logo-orizzontale.png" alt="APEBEESTORE" width={736} height={188} priority />
         </Link>
-        <nav className={`nav${aperto ? " open" : ""}`} id="menu" aria-label="Menu principale">
-          {negozio.map((l) => (
-            <Link key={l.href} href={l.href} aria-current={pathname === l.href ? "page" : undefined}>
-              {l.label}
-            </Link>
-          ))}
-          <span className="nav-label">Info</span>
-          {info.map((l) => (
-            <Link key={l.href} className="nav-info" href={l.href} aria-current={pathname === l.href ? "page" : undefined}>
-              {l.label}
-            </Link>
-          ))}
+        <nav className={`nav${aperto ? " open" : ""}`} id="menu" aria-label={t.header.menu} ref={menu}>
+          {negozio.map((l) => voce(l))}
+          <span className="nav-label">{t.header.info}</span>
+          {info.map((l) => voce(l, "nav-info"))}
+          <Lingue className="lang lang--menu" />
         </nav>
         <div className="tools">
-          <span className="lang">
-            <b>IT</b> / EN
-          </span>
-          <button className="icon-btn" type="button" aria-label="Cambia tema chiaro o scuro" onClick={toggleTheme}>
+          <Lingue className="lang lang--barra" />
+          <button className="icon-btn" type="button" aria-label={t.header.tema} onClick={toggleTheme}>
             <SunMoon size={22} strokeWidth={2} />
           </button>
-          <button className="icon-btn" type="button" aria-label="Cerca">
-            <Search size={22} strokeWidth={2} />
-          </button>
-          <button className="icon-btn" type="button" aria-label={`Carrello, ${count} prodotti`} onClick={apri}>
+          <button
+            className="icon-btn"
+            type="button"
+            aria-label={t.header.carrello(count)}
+            onClick={() => {
+              setAperto(false);
+              apri();
+            }}
+          >
             <ShoppingBag size={22} strokeWidth={2} />
             {count > 0 && <span className="count">{count}</span>}
           </button>
           <button
             className="icon-btn menu-btn"
             type="button"
-            aria-label={aperto ? "Chiudi il menu" : "Apri il menu"}
+            aria-label={aperto ? t.header.chiudiMenu : t.header.apriMenu}
             aria-expanded={aperto}
             aria-controls="menu"
             onClick={() => setAperto(!aperto)}

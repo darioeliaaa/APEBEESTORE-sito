@@ -31,13 +31,19 @@ const sicurezza = [
 ];
 
 const nextConfig: NextConfig = {
+  // la cartella del progetto è su iCloud (Desktop): iCloud duplica i file di lavoro di Next ("LOG 2", "routes.d 2.ts")
+  // e npm run dev non parte più. In locale li mettiamo in ".next.nosync", che iCloud non sincronizza; su Vercel resta ".next".
+  distDir: process.env.VERCEL ? ".next" : ".next.nosync",
   poweredByHeader: false,
+  // il sito ha due lingue con due strutture separate (src/app/(it) e src/app/en):
+  // per gli indirizzi che non esistono serve una pagina 404 unica (src/app/global-not-found.tsx)
+  experimental: { globalNotFound: true },
   agentRules: false,
   async headers() {
     return [{ source: "/:path*", headers: sicurezza }];
   },
   async redirects() {
-    return [{ source: "/come-ordinare", destination: "/faq", permanent: true }];
+    return [{ source: "/come-ordinare", destination: "/faq#come-ordinare", permanent: true }];
   },
 };
 

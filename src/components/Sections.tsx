@@ -1,44 +1,52 @@
 import Image from "next/image";
 import Link from "next/link";
+import { percorso, testi, type Lingua } from "@/i18n/testi";
+import type { FotoBanner } from "@/lib/sheet";
+import { Banner } from "./Banner";
 import { HoneycombCanvas } from "./HoneycombCanvas";
 
-export function DemoBanner({ dalFoglio }: { dalFoglio: boolean }) {
+export function DemoBanner({ lang, dalFoglio }: { lang: Lingua; dalFoglio: boolean }) {
+  const t = testi[lang].demo;
   return (
     <div className="demo">
       <div className="wrap">
-        <span>Versione di prova</span>
-        <span>{dalFoglio ? "Prodotti presi dal Google Sheet" : "Prodotti e prezzi non reali"}</span>
+        <span>{t.prova}</span>
+        <span>{dalFoglio ? t.foglio : t.finti}</span>
       </div>
     </div>
   );
 }
 
-export function Hero() {
+export function Hero({ lang, foto }: { lang: Lingua; foto: FotoBanner[] }) {
+  const t = testi[lang].hero;
   return (
     <section className="hero">
       <div className="wrap">
         <div className="hero-text">
-          <span className="label">Originali dal Giappone</span>
+          <span className="label">{t.label}</span>
           <h1>
             Bee ready <span className="hl">to spin.</span>
           </h1>
-          <p className="lead">Giochi e collezionabili originali, importati dal Giappone. Spedizione e dogana incluse nel prezzo.</p>
+          <p className="lead">{t.lead}</p>
           <div className="ctas">
-            <Link className="btn btn--primary" href="/catalogo">
-              Vai al catalogo
+            <Link className="btn btn--primary" href={percorso(lang, "/catalogo")}>
+              {t.catalogo}
             </Link>
-            <Link className="btn btn--ghost" href="/preordini">
-              Preordini
+            <Link className="btn btn--ghost" href={percorso(lang, "/preordini")}>
+              {t.preordini}
             </Link>
           </div>
         </div>
-        <div className="hero-art">
-          <HoneycombCanvas />
-          <Image className="bee" src="/brand/icona.png" alt="" width={940} height={695} priority />
-          <span className="tag">
-            Dal Giappone in <b>3–4 settimane</b>
-          </span>
-        </div>
+        {/* le foto del banner arrivano dalla scheda BANNER del foglio; se non ce ne sono resta l'ape */}
+        <Banner foto={foto}>
+          <div className="hero-art">
+            <HoneycombCanvas />
+            <Image className="bee" src="/brand/icona.png" alt="" width={940} height={695} priority />
+            <span className="tag">
+              {t.tag} <b>{t.tempo}</b>
+            </span>
+          </div>
+        </Banner>
       </div>
     </section>
   );
@@ -56,13 +64,6 @@ export function PageHead({ label, titolo, testo, stretto }: { label: string; tit
   );
 }
 
-export const passi = [
-  { titolo: "Scegli", testo: "Metti nel carrello quello che vuoi." },
-  { titolo: "Ordina", testo: "Inserisci i tuoi dati. L'ordine arriva su WhatsApp." },
-  { titolo: "Paga", testo: "Su WhatsApp con PayPal, Revolut o bonifico." },
-  { titolo: "Ricevi", testo: "In 3–4 settimane a casa, o a mano a Milano, Como e Varese." },
-];
-
 export function Passi({ lista }: { lista: { titolo: string; testo: string }[] }) {
   return (
     <ol className="steps">
@@ -77,53 +78,56 @@ export function Passi({ lista }: { lista: { titolo: string; testo: string }[] })
   );
 }
 
-export function Community() {
+export function Community({ lang }: { lang: Lingua }) {
+  const t = testi[lang].community;
   return (
     <section className="community" id="community">
       <div className="wrap">
         <div className="col">
-          <span className="label">Community WhatsApp</span>
-          <h2>Entra nella community</h2>
-          <p>Più di 200 appassionati. Nuove uscite, preordini e tornei li annunciamo prima lì.</p>
+          <span className="label">{t.label}</span>
+          <h2>{t.titolo}</h2>
+          <p>{t.testo}</p>
         </div>
         <a className="btn" href="https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue" target="_blank" rel="noopener noreferrer">
-          Entra
+          {t.entra}
         </a>
       </div>
     </section>
   );
 }
 
-export function Footer() {
+export function Footer({ lang }: { lang: Lingua }) {
+  const t = testi[lang];
+  const p = (href: string) => percorso(lang, href);
   return (
     <footer className="footer">
       <div className="stripe" aria-hidden="true" />
       <div className="wrap">
         <div className="brand">
-          <Link className="logo" href="/" aria-label="APEBEESTORE">
+          <Link className="logo" href={p("/")} aria-label="APEBEESTORE">
             <Image className="logo-white" src="/brand/logo-orizzontale.png" alt="APEBEESTORE" width={736} height={188} />
           </Link>
           <p className="tagline">Bee ready to spin.</p>
         </div>
         <div>
-          <h3>Negozio</h3>
+          <h3>{t.footer.negozio}</h3>
           <ul>
-            <li><Link href="/catalogo">Catalogo</Link></li>
-            <li><Link href="/preordini">Preordini</Link></li>
-            <li><Link href="/riscatti">Riscatti app</Link></li>
+            <li><Link href={p("/catalogo")}>{t.nav.catalogo}</Link></li>
+            <li><Link href={p("/preordini")}>{t.nav.preordini}</Link></li>
+            <li><Link href={p("/riscatti")}>{t.nav.riscatti}</Link></li>
           </ul>
         </div>
         <div>
-          <h3>Info</h3>
+          <h3>{t.footer.info}</h3>
           <ul>
-            <li><Link href="/chi-siamo">Chi siamo</Link></li>
-            <li><Link href="/faq#come-ordinare">Come ordinare</Link></li>
-            <li><Link href="/recensioni">Recensioni</Link></li>
-            <li><Link href="/faq">FAQ</Link></li>
+            <li><Link href={p("/chi-siamo")}>{t.nav.chiSiamo}</Link></li>
+            <li><Link href={`${p("/faq")}#come-ordinare`}>{t.nav.comeOrdinare}</Link></li>
+            <li><Link href={p("/recensioni")}>{t.nav.recensioni}</Link></li>
+            <li><Link href={p("/faq")}>{t.nav.faq}</Link></li>
           </ul>
         </div>
         <div>
-          <h3>Contatti</h3>
+          <h3>{t.footer.contatti}</h3>
           <ul>
             <li><a href="#">WhatsApp</a></li>
             <li><a href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">Instagram</a></li>
@@ -131,8 +135,8 @@ export function Footer() {
           </ul>
         </div>
         <div className="legal">
-          <span>Ragione sociale · Sede · P.IVA · Email</span>
-          <span>Condizioni di vendita · Privacy</span>
+          <span>{t.footer.legale}</span>
+          <span>{t.footer.condizioni}</span>
         </div>
       </div>
     </footer>

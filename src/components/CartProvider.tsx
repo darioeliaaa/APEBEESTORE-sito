@@ -3,11 +3,14 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Minus, Plus, Trash2, X } from "lucide-react";
 import type { Prodotto } from "@/data/demo";
+import { useLingua } from "@/i18n/LinguaProvider";
+import { testi, type Lingua } from "@/i18n/testi";
 import { euro, giorno } from "@/lib/format";
 
-// Carrello di prova.
+// Carrello.
 // Preordini e riscatti app non si uniscono ad altri prodotti.
 // I preordini tra loro solo se hanno la stessa data.
+// I testi (anche i messaggi) sono nel dizionario src/i18n/testi.ts.
 
 type Riga = { p: Prodotto; qta: number };
 
@@ -25,31 +28,112 @@ export function useCart() {
   return ctx;
 }
 
-export function motivoBlocco(nelCarrello: Prodotto[], p: Prodotto): string | null {
-  if (p.stato === "soldout") return "Prodotto sold out.";
+export function motivoBlocco(nelCarrello: Prodotto[], p: Prodotto, lang: Lingua): string | null {
+  const b = testi[lang].carrello.blocchi;
+  if (p.stato === "soldout") return b.soldout;
   const primo = nelCarrello[0];
   if (!primo) return null;
   if (primo.stato !== p.stato) {
-    if (p.stato === "preordine") return "I preordini vanno in un ordine a parte.";
-    if (p.stato === "riscatto") return "I riscatti app vanno in un ordine a parte.";
-    if (primo.stato === "preordine") return "Hai un preordine nel carrello: questo va in un ordine a parte.";
-    return "Hai un riscatto app nel carrello: questo va in un ordine a parte.";
+    if (p.stato === "preordine") return b.preordine;
+    if (p.stato === "riscatto") return b.riscatto;
+    if (primo.stato === "preordine") return b.hoPreordine;
+    return b.hoRiscatto;
   }
   // confronto la data intera (anno compreso), così 26/12/2026 e 26/12/2027 non si mischiano
   if (p.stato === "preordine" && primo.uscita !== p.uscita) {
-    return primo.uscita
-      ? `Puoi unire solo preordini con la stessa data (${giorno(primo.uscita)}).`
-      : "Puoi unire solo preordini con la stessa data.";
+    return b.data(primo.uscita ? giorno(primo.uscita, lang) : undefined);
   }
   return null;
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+// il carrello resta salvato nel browser per 14 giorni, così non si perde ricaricando la pagina
+const MEMORIA = "apebeestore-carrello";
+const DURATA = 14 * 24 * 60 * 60 * 1000;
+const MAX_QTA = 99;
+const statiValidi = ["ordinazione", "preordine", "riscatto", "soldout"];
+
+// quello che arriva dal browser lo ricontrollo: potrebbe essere vecchio o modificato a mano
+function rigaValida(r: unknown): r is Riga {
+  const x = r as Riga;
+  return (
+    !!x?.p &&
+    typeof x.p.codice === "string" &&
+    typeof x.p.nome === "string" &&
+    typeof x.p.prezzo === "number" &&
+    x.p.prezzo >= 1 &&
+    x.p.prezzo <= 5000 &&
+    statiValidi.includes(x.p.stato) &&
+    x.p.stato !== "soldout" &&
+    Number.isInteger(x.qta) &&
+    x.qta >= 1 &&
+    x.qta <= MAX_QTA
+  );
+}
+
+function caricaCarrello(): Riga[] {
+  try {
+    const salvato = JSON.parse(localStorage.getItem(MEMORIA) ?? "null");
+    if (!salvato || Date.now() - salvato.quando > DURATA || !Array.isArray(salvato.righe)) return [];
+    return salvato.righe.filter(rigaValida);
+  } catch {
+    return [];
+  }
+}
+
+// il carrello salvato può essere vecchio: lo confronto con il catalogo di adesso
+// (prezzi aggiornati, sold out e prodotti spariti tolti, niente mischiati che non si possono unire)
+function allinea(salvate: Riga[], catalogo: Prodotto[] | null, lang: Lingua): { righe: Riga[]; avvisi: string[] } {
+  if (!catalogo) return { righe: salvate, avvisi: [] };
+  const a = testi[lang].carrello.avvisi;
+  const avvisi: string[] = [];
+  const righe: Riga[] = [];
+  for (const r of salvate) {
+    const ora = catalogo.find((p) => p.codice === r.p.codice);
+    if (!ora) {
+      avvisi.push(a.sparito(r.p.codice));
+      continue;
+    }
+    if (ora.stato === "soldout") {
+      avvisi.push(a.soldout(ora.codice));
+      continue;
+    }
+    if (motivoBlocco(righe.map((x) => x.p), ora, lang)) {
+      avvisi.push(a.aParte(ora.codice));
+      continue;
+    }
+    if (ora.prezzo !== r.p.prezzo) avvisi.push(a.prezzo(ora.codice, euro(ora.prezzo, lang)));
+    righe.push({ p: ora, qta: r.qta });
+  }
+  return { righe, avvisi };
+}
+
+export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | null; children: React.ReactNode }) {
+  const { lang, t } = useLingua();
   const [righe, setRighe] = useState<Riga[]>([]);
+  const [avvisi, setAvvisi] = useState<string[]>([]);
+  const [caricato, setCaricato] = useState(false);
   const [aperto, setAperto] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chiudiBtn = useRef<HTMLButtonElement>(null);
+  const pannello = useRef<HTMLElement>(null);
+  const prima = useRef<HTMLElement | null>(null);
+
+  // all'apertura della pagina riprendo il carrello salvato e lo allineo al catalogo
+  useEffect(() => {
+    const { righe: aggiornate, avvisi: note } = allinea(caricaCarrello(), catalogo, lang);
+    setRighe(aggiornate);
+    setAvvisi(note);
+    setCaricato(true);
+  }, [catalogo, lang]);
+
+  useEffect(() => {
+    if (!caricato) return;
+    try {
+      if (righe.length) localStorage.setItem(MEMORIA, JSON.stringify({ quando: Date.now(), righe }));
+      else localStorage.removeItem(MEMORIA);
+    } catch {}
+  }, [righe, caricato]);
 
   const show = useCallback((msg: string) => {
     setToast(msg);
@@ -59,24 +143,52 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
-  // pannello aperto: Esc chiude e la pagina sotto non scorre
+  useEffect(() => {
+    if (avvisi.length) show(t.carrello.aggiornato);
+  }, [avvisi, show, t]);
+
+  // pannello aperto: Esc chiude, il tasto Tab resta dentro il pannello e la pagina sotto non scorre
   useEffect(() => {
     if (!aperto) return;
+    prima.current = document.activeElement as HTMLElement | null;
     chiudiBtn.current?.focus();
-    const esc = (e: KeyboardEvent) => e.key === "Escape" && setAperto(false);
-    document.addEventListener("keydown", esc);
+    const tasti = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setAperto(false);
+      if (e.key !== "Tab" || !pannello.current) return;
+      const cliccabili = [...pannello.current.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]")];
+      if (!cliccabili.length) return;
+      const primo = cliccabili[0];
+      const ultimo = cliccabili[cliccabili.length - 1];
+      const fuori = !pannello.current.contains(document.activeElement);
+      if (e.shiftKey && (document.activeElement === primo || fuori)) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && (document.activeElement === ultimo || fuori)) {
+        e.preventDefault();
+        primo.focus();
+      }
+    };
+    document.addEventListener("keydown", tasti);
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", esc);
+      document.removeEventListener("keydown", tasti);
       document.body.style.overflow = "";
+      // chiuso il carrello, il cursore torna dov'era (sull'icona del carrello); gli avvisi li hai già visti
+      prima.current?.focus();
+      setAvvisi([]);
     };
   }, [aperto]);
 
   const add = useCallback(
     (p: Prodotto) => {
-      const blocco = motivoBlocco(righe.map((r) => r.p), p);
+      const blocco = motivoBlocco(righe.map((r) => r.p), p, lang);
       if (blocco) {
         show(blocco);
+        return;
+      }
+      const gia = righe.find((r) => r.p.codice === p.codice);
+      if (gia && gia.qta >= MAX_QTA) {
+        show(t.carrello.massimo(MAX_QTA));
         return;
       }
       setRighe((rr) =>
@@ -84,13 +196,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ? rr.map((r) => (r.p.codice === p.codice ? { ...r, qta: r.qta + 1 } : r))
           : [...rr, { p, qta: 1 }],
       );
-      show(`${p.codice} aggiunto al carrello`);
+      show(t.carrello.aggiunto(p.codice));
     },
-    [righe, show],
+    [righe, show, lang, t],
   );
 
   const cambia = (codice: string, di: number) =>
-    setRighe((rr) => rr.map((r) => (r.p.codice === codice ? { ...r, qta: r.qta + di } : r)).filter((r) => r.qta > 0));
+    setRighe((rr) =>
+      rr.map((r) => (r.p.codice === codice ? { ...r, qta: Math.min(MAX_QTA, r.qta + di) } : r)).filter((r) => r.qta > 0),
+    );
 
   const count = righe.reduce((n, r) => n + r.qta, 0);
   const totale = righe.reduce((n, r) => n + r.p.prezzo * r.qta, 0);
@@ -101,6 +215,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       {aperto && (
         <div className="carrello-sfondo" onClick={() => setAperto(false)}>
           <aside
+            ref={pannello}
             className="carrello"
             role="dialog"
             aria-modal="true"
@@ -108,14 +223,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="carrello-testa">
-              <h2 id="carrello-titolo">Carrello</h2>
-              <button ref={chiudiBtn} className="icon-btn" type="button" aria-label="Chiudi il carrello" onClick={() => setAperto(false)}>
+              <h2 id="carrello-titolo">{t.carrello.titolo}</h2>
+              <button ref={chiudiBtn} className="icon-btn" type="button" aria-label={t.carrello.chiudi} onClick={() => setAperto(false)}>
                 <X size={22} strokeWidth={2} />
               </button>
             </div>
 
+            {avvisi.length > 0 && (
+              <ul className="carrello-avvisi">
+                {avvisi.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            )}
+
             {righe.length === 0 ? (
-              <p className="carrello-vuoto">Il carrello è vuoto.</p>
+              <p className="carrello-vuoto">{t.carrello.vuoto}</p>
             ) : (
               <>
                 <ul className="carrello-righe">
@@ -124,31 +247,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                       <div className="carrello-nome">
                         <span className="label">{p.codice}</span>
                         <strong>{p.nome}</strong>
-                        {p.stato === "preordine" && p.uscita && <span className="uscita">Esce il {giorno(p.uscita)}</span>}
+                        {p.stato === "preordine" && p.uscita && <span className="uscita">{t.card.esce(giorno(p.uscita, lang))}</span>}
                       </div>
                       <div className="carrello-qta">
-                        <button type="button" aria-label={`Togli un ${p.codice}`} onClick={() => cambia(p.codice, -1)}>
+                        <button type="button" aria-label={t.carrello.togli(p.codice)} onClick={() => cambia(p.codice, -1)}>
                           {qta > 1 ? <Minus size={16} strokeWidth={2.4} /> : <Trash2 size={16} strokeWidth={2.2} />}
                         </button>
-                        <span aria-label={`Quantità ${qta}`}>{qta}</span>
-                        <button type="button" aria-label={`Aggiungi un ${p.codice}`} onClick={() => cambia(p.codice, 1)}>
+                        <span aria-label={t.carrello.quantita(qta)}>{qta}</span>
+                        <button type="button" aria-label={t.carrello.aggiungiUno(p.codice)} onClick={() => cambia(p.codice, 1)}>
                           <Plus size={16} strokeWidth={2.4} />
                         </button>
                       </div>
-                      <span className="carrello-prezzo">{euro(p.prezzo * qta)}</span>
+                      <span className="carrello-prezzo">{euro(p.prezzo * qta, lang)}</span>
                     </li>
                   ))}
                 </ul>
                 <div className="carrello-piede">
                   <div className="carrello-totale">
-                    <span>Totale</span>
-                    <strong>{euro(totale)}</strong>
+                    <span>{t.carrello.totale}</span>
+                    <strong>{euro(totale, lang)}</strong>
                   </div>
-                  <span className="incl">Spedizione dal Giappone e dogana incluse</span>
+                  <span className="incl">{t.carrello.incluse}</span>
                   <button className="btn btn--primary" type="button" disabled>
-                    Concludi l&apos;ordine
+                    {t.carrello.concludi}
                   </button>
-                  <span className="carrello-nota">Presto potrai concludere l&apos;ordine direttamente qui.</span>
+                  <span className="carrello-nota">{t.carrello.presto}</span>
                 </div>
               </>
             )}

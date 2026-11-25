@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown, ChevronDown, SlidersHorizontal } from "lucide-react";
 import type { Prodotto } from "@/data/demo";
+import { useLingua } from "@/i18n/LinguaProvider";
+import { nomeCategoria } from "@/i18n/testi";
 import { ProductCard } from "./ProductCard";
 
 // le linee e le categorie si creano da sole dai prodotti:
@@ -19,19 +21,15 @@ function albero(prodotti: Prodotto[]) {
 
 const chiave = (linea: string, categoria: string) => `${linea}/${categoria}`;
 
-const ordini = [
-  { id: "consigliati", label: "Consigliati" },
-  { id: "prezzo-su", label: "Prezzo crescente" },
-  { id: "prezzo-giu", label: "Prezzo decrescente" },
-  { id: "nome", label: "Nome A–Z" },
-] as const;
+// i nomi da mostrare sono nel dizionario (src/i18n/testi.ts)
+const ordini = [{ id: "consigliati" }, { id: "prezzo-su" }, { id: "prezzo-giu" }, { id: "nome" }] as const;
 
 const fasce = [
-  { id: "tutte", label: "Tutti i prezzi", min: 0, max: Infinity },
-  { id: "0-30", label: "Fino a € 30", min: 0, max: 30 },
-  { id: "30-60", label: "€ 30 – 60", min: 30, max: 60 },
-  { id: "60-100", label: "€ 60 – 100", min: 60, max: 100 },
-  { id: "100", label: "Oltre € 100", min: 100, max: Infinity },
+  { id: "tutte", min: 0, max: Infinity },
+  { id: "0-30", min: 0, max: 30 },
+  { id: "30-60", min: 30, max: 60 },
+  { id: "60-100", min: 60, max: 100 },
+  { id: "100", min: 100, max: Infinity },
 ] as const;
 
 type Ordine = (typeof ordini)[number]["id"];
@@ -39,25 +37,56 @@ type Fascia = (typeof fasce)[number]["id"];
 type Pannello = "filtri" | "ordina" | null;
 
 export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
+  const { lang, t } = useLingua();
+  const quanti = t.filtri.quanti;
   const [scelte, setScelte] = useState<string[]>([]);
   const [noSoldOut, setNoSoldOut] = useState(false);
   const [ordine, setOrdine] = useState<Ordine>("consigliati");
   const [fascia, setFascia] = useState<Fascia>("tutte");
   const [aperto, setAperto] = useState<Pannello>(null);
+  const [pronto, setPronto] = useState(false);
   const barra = useRef<HTMLDivElement>(null);
 
-  // chiude i pannelli con un clic fuori o con Esc
+  // le scelte restano nell'indirizzo (es. /catalogo?ordine=prezzo-su):
+  // tornando indietro o condividendo il link si ritrova il catalogo come lo si era lasciato
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const esistono = new Set(prodotti.map((p) => chiave(p.linea, p.categoria)));
+    const o = q.get("ordine");
+    const fz = q.get("prezzo");
+    setScelte(q.getAll("cat").filter((c) => esistono.has(c)));
+    setNoSoldOut(q.get("soldout") === "no");
+    if (ordini.some((x) => x.id === o)) setOrdine(o as Ordine);
+    if (fasce.some((x) => x.id === fz)) setFascia(fz as Fascia);
+    setPronto(true);
+  }, [prodotti]);
+
+  useEffect(() => {
+    if (!pronto) return;
+    const q = new URLSearchParams();
+    for (const c of scelte) q.append("cat", c);
+    if (noSoldOut) q.set("soldout", "no");
+    if (ordine !== "consigliati") q.set("ordine", ordine);
+    if (fascia !== "tutte") q.set("prezzo", fascia);
+    const cerca = q.toString() ? `?${q}` : "";
+    if (cerca !== window.location.search) window.history.replaceState(null, "", window.location.pathname + cerca);
+  }, [pronto, scelte, noSoldOut, ordine, fascia]);
+
+  // chiude i pannelli con un clic fuori o con Esc; sul telefono il pannello sale dal basso e la pagina sotto non scorre
   useEffect(() => {
     if (!aperto) return;
     const fuori = (e: MouseEvent) => {
       if (barra.current && !barra.current.contains(e.target as Node)) setAperto(null);
     };
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setAperto(null);
+    const telefono = window.matchMedia("(max-width: 520px)").matches;
     document.addEventListener("mousedown", fuori);
     document.addEventListener("keydown", esc);
+    if (telefono) document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("mousedown", fuori);
       document.removeEventListener("keydown", esc);
+      if (telefono) document.body.style.overflow = "";
     };
   }, [aperto]);
 
@@ -69,7 +98,7 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
     .sort((a, b) => {
       if (ordine === "prezzo-su") return a.prezzo - b.prezzo;
       if (ordine === "prezzo-giu") return b.prezzo - a.prezzo;
-      if (ordine === "nome") return a.nome.localeCompare(b.nome, "it");
+      if (ordine === "nome") return a.nome.localeCompare(b.nome, lang);
       return 0;
     });
 
@@ -104,10 +133,11 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
           onClick={() => apri("filtri")}
         >
           <SlidersHorizontal size={18} strokeWidth={2.2} />
-          Filtri{nFiltri > 0 && <span className="tb-n">{nFiltri}</span>}
+          {t.filtri.filtri}
+          {nFiltri > 0 && <span className="tb-n">{nFiltri}</span>}
         </button>
 
-        <span className="tb-count">{lista.length} prodotti</span>
+        <span className="tb-count">{quanti(lista.length)}</span>
 
         <button
           type="button"
@@ -117,17 +147,20 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
           onClick={() => apri("ordina")}
         >
           <ArrowUpDown size={18} strokeWidth={2.2} />
-          Ordina per{nOrdina > 0 && <span className="tb-n">{nOrdina}</span>}
+          {t.filtri.ordinaPer}
+          {nOrdina > 0 && <span className="tb-n">{nOrdina}</span>}
           <ChevronDown size={16} strokeWidth={2.4} />
         </button>
 
+        {aperto && <div className="pop-sfondo" aria-hidden="true" onClick={() => setAperto(null)} />}
+
         {aperto === "filtri" && (
-          <div className="pop pop--left" id="pannello-filtri" role="dialog" aria-label="Filtri">
+          <div className="pop pop--left" id="pannello-filtri" role="dialog" aria-label={t.filtri.filtri}>
             <fieldset>
-              <legend>Categorie</legend>
+              <legend>{t.filtri.categorie}</legend>
               <label className="opt">
                 <input type="checkbox" checked={scelte.length === 0} onChange={() => setScelte([])} />
-                Tutto
+                {t.filtri.tutto}
               </label>
               {linee.map(({ linea, categorie }) => (
                 <div className="linea" key={linea}>
@@ -142,47 +175,47 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
                   {categorie.map((c) => (
                     <label className="opt opt--sub" key={c}>
                       <input type="checkbox" checked={scelte.includes(chiave(linea, c))} onChange={() => cambia(chiave(linea, c))} />
-                      {c}
+                      {nomeCategoria(lang, c)}
                     </label>
                   ))}
                 </div>
               ))}
             </fieldset>
             <fieldset>
-              <legend>Disponibilità</legend>
+              <legend>{t.filtri.disponibilita}</legend>
               <label className="opt">
                 <input type="checkbox" checked={noSoldOut} onChange={() => setNoSoldOut(!noSoldOut)} />
-                Nascondi i sold out
+                {t.filtri.nascondiSoldOut}
               </label>
             </fieldset>
             <div className="pop-foot">
               <button type="button" className="link" onClick={azzeraFiltri}>
-                Azzera
+                {t.filtri.azzera}
               </button>
               <button type="button" className="btn btn--primary btn--sm" onClick={() => setAperto(null)}>
-                Mostra {lista.length} prodotti
+                {t.filtri.mostra(lista.length)}
               </button>
             </div>
           </div>
         )}
 
         {aperto === "ordina" && (
-          <div className="pop pop--right" id="pannello-ordina" role="dialog" aria-label="Ordina per">
+          <div className="pop pop--right" id="pannello-ordina" role="dialog" aria-label={t.filtri.ordinaPer}>
             <fieldset>
-              <legend>Ordina per</legend>
+              <legend>{t.filtri.ordinaPer}</legend>
               {ordini.map((o) => (
                 <label className="opt" key={o.id}>
                   <input type="radio" name="ordine" checked={ordine === o.id} onChange={() => setOrdine(o.id)} />
-                  {o.label}
+                  {t.filtri.ordini[o.id]}
                 </label>
               ))}
             </fieldset>
             <fieldset>
-              <legend>Fascia di prezzo</legend>
+              <legend>{t.filtri.fascia}</legend>
               {fasce.map((x) => (
                 <label className="opt" key={x.id}>
                   <input type="radio" name="fascia" checked={fascia === x.id} onChange={() => setFascia(x.id)} />
-                  {x.label}
+                  {t.filtri.fasce[x.id]}
                 </label>
               ))}
             </fieldset>
@@ -195,10 +228,10 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
                   setFascia("tutte");
                 }}
               >
-                Azzera
+                {t.filtri.azzera}
               </button>
               <button type="button" className="btn btn--primary btn--sm" onClick={() => setAperto(null)}>
-                Mostra {lista.length} prodotti
+                {t.filtri.mostra(lista.length)}
               </button>
             </div>
           </div>
@@ -213,9 +246,9 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
         </div>
       ) : (
         <div className="vuoto">
-          <p>Nessun prodotto con questi filtri.</p>
+          <p>{t.filtri.nessuno}</p>
           <button type="button" className="btn btn--ghost btn--sm" onClick={azzeraTutto}>
-            Azzera i filtri
+            {t.filtri.azzeraFiltri}
           </button>
         </div>
       )}

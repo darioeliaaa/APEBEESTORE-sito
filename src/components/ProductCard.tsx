@@ -1,22 +1,23 @@
 "use client";
 
 import type { Prodotto } from "@/data/demo";
+import { useLingua } from "@/i18n/LinguaProvider";
 import { euro, giorno } from "@/lib/format";
 import { useState } from "react";
 import { useCart } from "./CartProvider";
 
-const badge = {
-  ordinazione: { cls: "badge--order", testo: () => "Su ordinazione" },
-  preordine: { cls: "badge--pre", testo: () => "Preordine" },
-  riscatto: { cls: "badge--redeem", testo: () => "Riscatto app" },
-  soldout: { cls: "badge--sold", testo: () => "Sold out" },
+const classi = {
+  ordinazione: "badge--order",
+  preordine: "badge--pre",
+  riscatto: "badge--redeem",
+  soldout: "badge--sold",
 };
 
 export function ProductCard({ p }: { p: Prodotto }) {
   const { add } = useCart();
+  const { lang, t } = useLingua();
   const [fotoRotta, setFotoRotta] = useState(false);
   const foto = p.immagine && !fotoRotta;
-  const b = badge[p.stato];
   const sold = p.stato === "soldout";
   const pre = p.stato === "preordine";
   const ris = p.stato === "riscatto";
@@ -32,26 +33,26 @@ export function ProductCard({ p }: { p: Prodotto }) {
         )}
       </div>
       <div className="info">
-        <span className={`badge ${b.cls}`}>{b.testo()}</span>
+        <span className={`badge ${classi[p.stato]}`}>{t.stati[p.stato]}</span>
         <div className="cat">
           <span className="label">{p.linea} ·</span>
           <span className="label">{p.codice}</span>
         </div>
         <h3>{p.nome}</h3>
-        {pre && <span className="uscita">{p.uscita ? `Esce il ${giorno(p.uscita)}` : "Data da confermare"}</span>}
+        {pre && <span className="uscita">{p.uscita ? t.card.esce(giorno(p.uscita, lang)) : t.card.daConfermare}</span>}
         <div className="row">
-          <span className="price">{euro(p.prezzo)}</span>
+          <span className="price">{euro(p.prezzo, lang)}</span>
           {sold ? (
             <button className="btn btn--sm" type="button" disabled>
-              Sold out
+              {t.card.soldout}
             </button>
           ) : (
             <button className={`btn btn--sm ${pre || ris ? "btn--dark" : "btn--primary"}`} type="button" onClick={() => add(p)}>
-              {pre ? "Preordina" : ris ? "Riscatta" : "Aggiungi"}
+              {pre ? t.card.preordina : ris ? t.card.riscatta : t.card.aggiungi}
             </button>
           )}
         </div>
-        {ris && <span className="incl">Serve il codice dell&apos;app</span>}
+        {ris && <span className="incl">{t.card.codiceApp}</span>}
       </div>
     </article>
   );

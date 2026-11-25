@@ -1,21 +1,19 @@
-import type { Metadata } from "next";
 import { ProductCard } from "@/components/ProductCard";
 import { PageHead } from "@/components/Sections";
+import { testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, perStato } from "@/lib/sheet";
 
-export const metadata: Metadata = { title: "Preordini" };
-export const revalidate = 300;
-
-export default async function Preordini() {
+export async function Preordini({ lang }: { lang: Lingua }) {
+  const t = testi[lang].preordini;
   const preordini = perStato((await leggiCatalogo()).prodotti, "preordine");
   return (
     <>
-      <PageHead label="Nuove uscite" titolo="Preordini" testo="Prenota le nuove uscite dal Giappone." />
+      <PageHead label={t.label} titolo={t.titolo} testo={t.testo} />
       <section className="block block--top">
         <div className="wrap">
           <div className="notice">
-            <strong>Si ordinano da soli.</strong>
-            <span>Insieme puoi mettere solo preordini con la stessa data di uscita.</span>
+            <strong>{t.avvisoTitolo}</strong>
+            <span>{t.avviso}</span>
           </div>
           {preordini.length > 0 ? (
             <div className="grid grid--3">
@@ -24,7 +22,7 @@ export default async function Preordini() {
               ))}
             </div>
           ) : (
-            <p className="vuoto">Al momento non ci sono preordini aperti. Li annunciamo prima nella community.</p>
+            <p className="vuoto">{t.vuoto}</p>
           )}
         </div>
       </section>

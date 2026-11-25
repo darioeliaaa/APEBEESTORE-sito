@@ -11,7 +11,9 @@ import { catalogo as demoCatalogo, preordini as demoPreordini, riscatti as demoR
 import type { Prodotto, Stato } from "@/data/demo";
 
 const FOGLIO = "CATALOGO";
-const AGGIORNA_OGNI = 300; // secondi: il sito rilegge il foglio ogni 5 minuti
+const FOGLIO_BANNER = "BANNER"; // scheda con le foto del banner in home
+// secondi: il sito rilegge il foglio ogni 5 minuti (in locale ogni 10 secondi, così le prove si vedono subito)
+const AGGIORNA_OGNI = process.env.NODE_ENV === "development" ? 10 : 300;
 
 // una riga del foglio che ha qualcosa che non va
 // scartato = la riga non va sul sito; altrimenti è solo un avviso
@@ -21,10 +23,27 @@ export type Catalogo = { prodotti: Prodotto[]; problemi: Problema[]; dalFoglio: 
 
 // ---------- accesso a Google ----------
 
+// la chiave privata si può incollare in tanti modi (con o senza virgolette, con \n scritti,
+// con gli a capo diventati spazi, o tutto il file JSON): qui la rimetto sempre nel formato giusto
+function chiavePrivata(grezza?: string) {
+  if (!grezza?.trim()) return undefined;
+  let s = grezza.trim();
+  if (s.startsWith("{")) {
+    try {
+      s = JSON.parse(s).private_key ?? s;
+    } catch {}
+  }
+  s = s.replace(/^["']+|["']+$/g, "").replace(/\\n/g, "\n");
+  const m = s.match(/-----BEGIN PRIVATE KEY-----([\s\S]*?)-----END PRIVATE KEY-----/);
+  if (!m) throw new Error("GOOGLE_PRIVATE_KEY non è nel formato giusto: deve contenere -----BEGIN PRIVATE KEY-----");
+  const corpo = m[1].replace(/\s+/g, "").match(/.{1,64}/g)?.join("\n") ?? "";
+  return `-----BEGIN PRIVATE KEY-----\n${corpo}\n-----END PRIVATE KEY-----\n`;
+}
+
 function chiavi() {
-  const id = process.env.GOOGLE_SHEET_ID;
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const chiave = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const id = process.env.GOOGLE_SHEET_ID?.trim();
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
+  const chiave = chiavePrivata(process.env.GOOGLE_PRIVATE_KEY);
   return id && email && chiave ? { id, email, chiave } : null;
 }
 
@@ -55,17 +74,20 @@ async function token(email: string, chiave: string): Promise<string> {
 }
 
 // fresco = salta la copia salvata e rilegge subito (serve alla pagina /controllo)
-async function leggiRighe(fresco = false): Promise<unknown[][]> {
+// null = la scheda non esiste
+async function leggiRighe(foglio: string, fresco = false): Promise<unknown[][] | null> {
   const k = chiavi();
   if (!k) throw new Error("Chiavi del Google Sheet mancanti");
   const url =
-    `https://sheets.googleapis.com/v4/spreadsheets/${k.id}/values/${encodeURIComponent(FOGLIO)}` +
+    `https://sheets.googleapis.com/v4/spreadsheets/${k.id}/values/${encodeURIComponent(foglio)}` +
     "?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING";
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${await token(k.email, k.chiave)}` },
     ...(fresco ? { cache: "no-store" as const } : { next: { revalidate: AGGIORNA_OGNI } }),
   });
-  if (!res.ok) throw new Error(`Lettura del foglio non riuscita (${res.status})`);
+  // Google risponde 400 quando la scheda non c'è
+  if (res.status === 400) return null;
+  if (!res.ok) throw new Error(`Lettura del foglio ${foglio} non riuscita (${res.status})`);
   return (await res.json()).values ?? [];
 }
 
@@ -137,13 +159,19 @@ function nome(v: unknown, codice: string) {
   return maiuscola(s);
 }
 
+// prezzi accettati: da 1 a 5.000 euro, fuori da qui è quasi sicuramente un errore di battitura
+export const PREZZO_MIN = 1;
+export const PREZZO_MAX = 5000;
+
 // capisce da solo se punto e virgola sono decimali o migliaia:
 // 35 · 35,5 · 35.50 · 1.234 · 1.234,50 · 1,234.50 · € 35
 export function prezzo(v: unknown): number {
-  if (typeof v === "number") return v;
-  const s = testo(v).replace(/[^\d,.]/g, "");
-  if (!/\d/.test(s)) return NaN;
-  const migliaia = (sep: string) => new RegExp(`^\\d{1,3}(\\${sep}\\d{3})+$`).test(s);
+  if (typeof v === "number") return Number.isFinite(v) ? Math.round(v * 100) / 100 : NaN;
+  // tolgo simbolo dell'euro, la parola euro e gli spazi; se resta qualcosa che non è un numero, non è un prezzo
+  const s = testo(v).toLowerCase().replace(/€|\beuro?\b|\s|'/g, "");
+  if (!/^[\d.,]*\d[\d.,]*$/.test(s)) return NaN;
+  // migliaia vere: "1.234" sì, "0.001" no
+  const migliaia = (sep: string) => new RegExp(`^[1-9]\\d{0,2}(\\${sep}\\d{3})+$`).test(s);
   let n: string;
   if (s.includes(",") && s.includes(".")) {
     // il separatore che viene per ultimo è quello dei decimali
@@ -207,7 +235,9 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
     if (!codice && !testo(cella(r, c.nome))) return; // riga vuota
     if (c.attivo >= 0 && !attivo(cella(r, c.attivo))) return; // spenta apposta
     if (!codice) return scarta("manca il codice");
-    if (visti.has(codice)) return scarta(`il codice ${codice} c'è già alla riga ${visti.get(codice)}`);
+    // "BX-56", "bx-56" e "BX 56" sono lo stesso prodotto
+    const chiaveCodice = codice.toUpperCase().replace(/[\s-]/g, "");
+    if (visti.has(chiaveCodice)) return scarta(`il codice ${codice} c'è già alla riga ${visti.get(chiaveCodice)}`);
 
     const statoScritto = testo(cella(r, c.stato));
     const stato = stati[pulisci(statoScritto)];
@@ -216,11 +246,13 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
 
     const prezzoScritto = cella(r, c.prezzo);
     const euro = prezzo(prezzoScritto);
-    if (!Number.isFinite(euro) || euro <= 0) {
-      return scarta(testo(prezzoScritto) ? `prezzo «${testo(prezzoScritto)}» non valido` : "manca il prezzo pubblico");
+    if (!testo(prezzoScritto)) return scarta("manca il prezzo pubblico");
+    if (!Number.isFinite(euro)) return scarta(`prezzo «${testo(prezzoScritto)}» non valido`);
+    if (euro < PREZZO_MIN || euro > PREZZO_MAX) {
+      return scarta(`prezzo «${testo(prezzoScritto)}» fuori dai limiti (da € 1 a € 5.000)`);
     }
 
-    visti.set(codice, riga);
+    visti.set(chiaveCodice, riga);
 
     // la data nel nome la tolgo solo nei preordini e solo se è una data vera
     // così "Grip - 1/2" resta com'è
@@ -238,10 +270,11 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
 
     const img = testo(cella(r, c.immagine));
     if (img && !img.startsWith("https://")) avvisa("il link della foto deve iniziare con https://");
+    const nomeSito = nome(nomeGrezzo, codice);
 
     prodotti.push({
       codice,
-      nome: nome(nomeGrezzo, codice),
+      nome: nomeSito,
       linea: testo(cella(r, c.linea)) || "Beyblade X",
       categoria: categoria(cella(r, c.categoria)),
       prezzo: euro,
@@ -277,10 +310,13 @@ export const leggiCatalogo = cache(async (): Promise<Catalogo> => {
     return demo();
   }
   // se qui c'è un errore la pagina non si aggiorna e resta l'ultima versione buona
-  const risultato = righeInProdotti(await leggiRighe());
+  const righe = await leggiRighe(FOGLIO);
+  if (!righe) throw new Error(`Nel Google Sheet non trovo la scheda ${FOGLIO}`);
+  const risultato = righeInProdotti(righe);
   controlla(risultato);
-  for (const p of risultato.problemi) {
-    console.warn(`[catalogo] riga ${p.riga}${p.codice ? ` (${p.codice})` : ""}: ${p.motivo}${p.scartato ? " · non è sul sito" : ""}`);
+  // nei log di Vercel solo le righe che non vanno sul sito; gli avvisi si vedono nella pagina /controllo
+  for (const p of risultato.problemi.filter((x) => x.scartato)) {
+    console.warn(`[catalogo] riga ${p.riga}${p.codice ? ` (${p.codice})` : ""}: ${p.motivo} · non è sul sito`);
   }
   return { ...risultato, dalFoglio: true };
 });
@@ -289,7 +325,11 @@ export const leggiCatalogo = cache(async (): Promise<Catalogo> => {
 export async function controllaFoglio(): Promise<{ prodotti: number; problemi: Problema[]; errore?: string }> {
   try {
     if (!chiavi()) return { prodotti: 0, problemi: [], errore: "Chiavi del Google Sheet mancanti" };
-    const risultato = righeInProdotti(await leggiRighe(true));
+    const righe = await leggiRighe(FOGLIO, true);
+    if (!righe) return { prodotti: 0, problemi: [], errore: `Nel Google Sheet non trovo la scheda ${FOGLIO}` };
+    const banner = await leggiRighe(FOGLIO_BANNER, true).catch(() => null);
+    const risultato = righeInProdotti(righe);
+    if (banner) risultato.problemi.push(...righeInBanner(banner).problemi);
     try {
       controlla(risultato);
     } catch (e) {
@@ -300,5 +340,58 @@ export async function controllaFoglio(): Promise<{ prodotti: number; problemi: P
     return { prodotti: 0, problemi: [], errore: (e as Error).message };
   }
 }
+
+// ---------- banner della home ----------
+// Scheda BANNER: una riga = una foto. Colonne (riconosciute dal nome):
+//   Immagine (URL)  il link della foto, deve iniziare con https://
+//   Link            facoltativo: dove porta il clic sulla foto (es. /preordini o https://...)
+//   Attivo          facoltativo: senza spunta la foto non si vede
+// Se la scheda non c'è o è vuota, in home resta il disegno con l'ape.
+
+export type FotoBanner = { immagine: string; link?: string };
+
+// "/preordini" (pagina del sito) oppure "https://..." (sito esterno), nient'altro.
+// Niente "//" o "/\" all'inizio: il browser li tratterebbe come link verso un altro sito.
+function linkSicuro(link: string) {
+  if (/^\/(?![/\\])[^\s\\]*$/.test(link)) return link;
+  if (/^https:\/\/[^\s\\]+$/.test(link)) return link;
+  return "";
+}
+
+export function righeInBanner(righe: unknown[][]): { foto: FotoBanner[]; problemi: Problema[] } {
+  const foto: FotoBanner[] = [];
+  const problemi: Problema[] = [];
+  if (!righe.length) return { foto, problemi };
+  // se la prima riga è già un link, la scheda non ha intestazione
+  const senzaTitoli = testo(righe[0][0]).startsWith("http");
+  const nomi = senzaTitoli ? [] : righe[0].map(pulisci);
+  const trova = (k: string) => nomi.findIndex((n) => n.startsWith(k));
+  const c = { immagine: Math.max(trova("immagine"), 0), link: trova("link"), attivo: trova("attivo") };
+
+  righe.slice(senzaTitoli ? 0 : 1).forEach((r, i) => {
+    const riga = i + (senzaTitoli ? 1 : 2);
+    if (c.attivo >= 0 && testo(r[c.attivo]) !== "" && !attivo(r[c.attivo])) return;
+    const link = c.link >= 0 ? testo(r[c.link]) : "";
+    const linkOk = linkSicuro(link);
+    if (link && !linkOk) problemi.push({ riga, codice: "BANNER", motivo: `link «${link}» non valido (usa /pagina o https://...)`, scartato: false });
+    // nella stessa cella si possono mettere anche più link, uno per riga o separati da virgola
+    // (la virgola divide solo se dopo inizia un altro link: dentro i link di Amazon ci sono virgole)
+    for (const img of testo(r[c.immagine]).split(/\s+|,\s*(?=https?:\/\/)/).filter(Boolean)) {
+      if (!img.startsWith("https://")) {
+        problemi.push({ riga, codice: "BANNER", motivo: `la foto «${img.slice(0, 40)}» deve iniziare con https://`, scartato: true });
+        continue;
+      }
+      foto.push({ immagine: img, link: linkOk || undefined });
+    }
+  });
+  return { foto, problemi };
+}
+
+export const leggiBanner = cache(async (): Promise<FotoBanner[]> => {
+  if (!chiavi()) return [];
+  // se Google non risponde l'errore sale e la home resta all'ultima versione buona
+  const righe = await leggiRighe(FOGLIO_BANNER);
+  return righe ? righeInBanner(righe).foto.slice(0, 10) : [];
+});
 
 export const perStato = (prodotti: Prodotto[], ...stati: Stato[]) => prodotti.filter((p) => stati.includes(p.stato));

@@ -1,26 +1,20 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { PageHead } from "@/components/Sections";
+import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, perStato } from "@/lib/sheet";
 
-export const metadata: Metadata = { title: "Riscatti app" };
-export const revalidate = 300;
-
-export default async function Riscatti() {
+export async function Riscatti({ lang }: { lang: Lingua }) {
+  const t = testi[lang].riscatti;
   const riscatti = perStato((await leggiCatalogo()).prodotti, "riscatto");
   return (
     <>
-      <PageHead
-        label="Cambiano ogni mese"
-        titolo="Riscatti app"
-        testo="I premi da riscattare con il codice dell'app Beyblade X."
-      />
+      <PageHead label={t.label} titolo={t.titolo} testo={t.testo} />
       <section className="block block--top">
         <div className="wrap">
           <div className="notice">
-            <strong>Si ordinano da soli.</strong>
-            <span>Non si possono unire ad altri prodotti o preordini.</span>
+            <strong>{t.avvisoTitolo}</strong>
+            <span>{t.avviso}</span>
           </div>
           {riscatti.length > 0 ? (
             <div className="grid grid--3">
@@ -29,12 +23,12 @@ export default async function Riscatti() {
               ))}
             </div>
           ) : (
-            <p className="vuoto">I premi di questo mese arrivano a breve.</p>
+            <p className="vuoto">{t.vuoto}</p>
           )}
-          <Link className="info-link" href="/faq#riscatti-app">
+          <Link className="info-link" href={`${percorso(lang, "/faq")}#riscatti-app`}>
             <span>
-              <strong>Come funziona il riscatto</strong>
-              Scegli il premio, inserisci il codice dell&apos;app quando ordini, ti arriva a casa.
+              <strong>{t.comeTitolo}</strong>
+              {t.come}
             </span>
             <span aria-hidden="true">→</span>
           </Link>

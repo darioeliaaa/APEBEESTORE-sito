@@ -1,16 +1,14 @@
-import type { Metadata } from "next";
 import { CatalogoLista } from "@/components/CatalogoLista";
 import { PageHead } from "@/components/Sections";
+import { testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, perStato } from "@/lib/sheet";
 
-export const metadata: Metadata = { title: "Catalogo" };
-export const revalidate = 300;
-
-export default async function Catalogo() {
+export async function Catalogo({ lang }: { lang: Lingua }) {
+  const t = testi[lang].catalogo;
   const { prodotti } = await leggiCatalogo();
   return (
     <>
-      <PageHead label="Su ordinazione · 3–4 settimane" titolo="Catalogo" testo="Spedizione e dogana incluse in tutti i prezzi." />
+      <PageHead label={t.label} titolo={t.titolo} testo={t.testo} />
       <section className="block block--top">
         <div className="wrap">
           <CatalogoLista prodotti={perStato(prodotti, "ordinazione", "soldout")} />

@@ -1,44 +1,40 @@
-import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono, Montserrat } from "next/font/google";
 import { CartProvider } from "@/components/CartProvider";
 import { Header } from "@/components/Header";
 import { DemoBanner, Footer } from "@/components/Sections";
+import { LinguaProvider } from "@/i18n/LinguaProvider";
+import type { Lingua } from "@/i18n/testi";
 import { leggiCatalogo } from "@/lib/sheet";
-import "./globals.css";
+import "@/app/globals.css";
 
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-montserrat" });
 const archivo = Archivo({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-archivo" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable: "--font-jetbrains" });
 
-export const metadata: Metadata = {
-  title: { default: "APEBEESTORE · Originali dal Giappone", template: "%s · APEBEESTORE" },
-  description: "Giochi e collezionabili originali importati dal Giappone, a partire dai Beyblade X Takara Tomy. Spedizione e dogana incluse nel prezzo.",
-  robots: { index: false, follow: false },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#0e0e0c",
-  viewportFit: "cover",
-};
-
 const themeScript = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+// la struttura comune a tutte le pagine, in italiano (src/app/(it)) e in inglese (src/app/en)
+export async function Struttura({ lang, children }: { lang: Lingua; children: React.ReactNode }) {
   // se il foglio ha un problema l'errore lo gestisce la pagina (che resta all'ultima versione buona):
   // qui basta sapere da dove arrivano i prodotti, così anche /controllo si apre lo stesso
-  const dalFoglio = await leggiCatalogo().then((c) => c.dalFoglio, () => true);
+  const catalogo = await leggiCatalogo().catch(() => null);
+  const dalFoglio = catalogo ? catalogo.dalFoglio : true;
+  // al carrello serve il catalogo di adesso per aggiornare prezzi e disponibilità (le foto no)
+  const perCarrello = catalogo ? catalogo.prodotti.map((p) => ({ ...p, immagine: undefined })) : null;
   return (
-    <html lang="it" suppressHydrationWarning className={`${montserrat.variable} ${archivo.variable} ${jetbrains.variable}`}>
+    <html lang={lang} suppressHydrationWarning className={`${montserrat.variable} ${archivo.variable} ${jetbrains.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <CartProvider>
-          <DemoBanner dalFoglio={dalFoglio} />
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <LinguaProvider lang={lang}>
+          <CartProvider catalogo={perCarrello}>
+            <DemoBanner lang={lang} dalFoglio={dalFoglio} />
+            <Header />
+            <main>{children}</main>
+            <Footer lang={lang} />
+          </CartProvider>
+        </LinguaProvider>
       </body>
     </html>
   );

@@ -3,6 +3,7 @@
 
 # build di Next.js
 /.next/
+/.next.nosync/
 /out/
 /build
 
