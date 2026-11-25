@@ -47,6 +47,7 @@ const it = {
     chiudiMenu: "Chiudi il menu",
     carrello: (n: number) => `Carrello, ${quantiIt(n)}`,
     lingua: "Lingua",
+    linee: "Linee del catalogo",
   },
   nav: {
     catalogo: "Catalogo",
@@ -101,6 +102,8 @@ const it = {
     label: "Su ordinazione · 3–4 settimane",
     titolo: "Catalogo",
     testo: "Spedizione e dogana incluse in tutti i prezzi.",
+    scegli: "Scegli il mondo che ti interessa. Spedizione e dogana incluse in tutti i prezzi.",
+    tutteLeLinee: "Tutte le linee",
   },
   filtri: {
     filtri: "Filtri",
@@ -234,6 +237,7 @@ const en: Testi = {
     chiudiMenu: "Close the menu",
     carrello: (n: number) => `Cart, ${quantiEn(n)}`,
     lingua: "Language",
+    linee: "Catalogue lines",
   },
   nav: {
     catalogo: "Catalogue",
@@ -296,6 +300,8 @@ const en: Testi = {
     label: "Special order · 3–4 weeks",
     titolo: "Catalogue",
     testo: "Shipping and customs included in every price.",
+    scegli: "Choose the world you're into. Shipping and customs included in every price.",
+    tutteLeLinee: "All lines",
   },
   filtri: {
     filtri: "Filters",

@@ -164,16 +164,19 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
               </label>
               {linee.map(({ linea, categorie }) => (
                 <div className="linea" key={linea}>
-                  <label className="opt opt--linea">
-                    <input
-                      type="checkbox"
-                      checked={categorie.every((c) => scelte.includes(chiave(linea, c)))}
-                      onChange={() => cambiaLinea(linea, categorie)}
-                    />
-                    {linea}
-                  </label>
+                  {/* nella pagina di una sola linea (es. /catalogo/pokemon) basta l'elenco delle categorie */}
+                  {linee.length > 1 && (
+                    <label className="opt opt--linea">
+                      <input
+                        type="checkbox"
+                        checked={categorie.every((c) => scelte.includes(chiave(linea, c)))}
+                        onChange={() => cambiaLinea(linea, categorie)}
+                      />
+                      {linea}
+                    </label>
+                  )}
                   {categorie.map((c) => (
-                    <label className="opt opt--sub" key={c}>
+                    <label className={linee.length > 1 ? "opt opt--sub" : "opt"} key={c}>
                       <input type="checkbox" checked={scelte.includes(chiave(linea, c))} onChange={() => cambia(chiave(linea, c))} />
                       {nomeCategoria(lang, c)}
                     </label>

@@ -4,15 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { Menu, ShoppingBag, SunMoon, X } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag, SunMoon, X } from "lucide-react";
 import { useLingua } from "@/i18n/LinguaProvider";
 import { inLingua, percorso, testi, type Lingua } from "@/i18n/testi";
 import { useCart } from "./CartProvider";
 
 // la ricerca la aggiungiamo più avanti
 
+// "Catalogo" è un menu a tendina con le linee (Beyblade X, Pokémon...), le altre voci sono link normali
 const negozio = [
-  { href: "/catalogo", voce: "catalogo" },
   { href: "/preordini", voce: "preordini" },
   { href: "/riscatti", voce: "riscatti" },
   { href: "/recensioni", voce: "recensioni" },
@@ -63,15 +63,35 @@ function Lingue({ className }: { className: string }) {
   );
 }
 
-export function Header() {
+export function Header({ linee }: { linee: { nome: string; slug: string }[] }) {
   const { count, apri } = useCart();
   const { lang, t } = useLingua();
   const pathname = usePathname();
   const [aperto, setAperto] = useState(false);
+  const [tendina, setTendina] = useState(false);
   const testata = useRef<HTMLElement>(null);
   const menu = useRef<HTMLElement>(null);
+  const voceCatalogo = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setAperto(false), [pathname]);
+  useEffect(() => {
+    setAperto(false);
+    setTendina(false);
+  }, [pathname]);
+
+  // tendina del catalogo aperta: si chiude con Esc o cliccando fuori
+  useEffect(() => {
+    if (!tendina) return;
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setTendina(false);
+    const fuori = (e: PointerEvent) => {
+      if (voceCatalogo.current && !voceCatalogo.current.contains(e.target as Node)) setTendina(false);
+    };
+    document.addEventListener("keydown", esc);
+    document.addEventListener("pointerdown", fuori);
+    return () => {
+      document.removeEventListener("keydown", esc);
+      document.removeEventListener("pointerdown", fuori);
+    };
+  }, [tendina]);
 
   // menu del telefono aperto: si chiude con Esc, toccando fuori o allargando la finestra,
   // la pagina sotto non scorre e il menu non va oltre lo schermo
@@ -98,6 +118,13 @@ export function Header() {
     };
   }, [aperto]);
 
+  const chiudiTutto = () => {
+    setAperto(false);
+    setTendina(false);
+  };
+  const catalogo = percorso(lang, "/catalogo");
+  const nelCatalogo = pathname === catalogo || pathname.startsWith(`${catalogo}/`);
+
   // toccando una voce il menu si chiude, anche se è la pagina in cui sei già
   const voce = (l: { href: string; voce: keyof typeof t.nav }, cls?: string) => {
     const href = percorso(lang, l.href);
@@ -115,6 +142,33 @@ export function Header() {
           <Image className="logo-white" src="/brand/logo-orizzontale.png" alt="APEBEESTORE" width={736} height={188} priority />
         </Link>
         <nav className={`nav${aperto ? " open" : ""}`} id="menu" aria-label={t.header.menu} ref={menu}>
+          <div className="voce-tendina" ref={voceCatalogo}>
+            <button
+              type="button"
+              aria-expanded={tendina}
+              aria-controls="tendina-catalogo"
+              data-attivo={nelCatalogo || undefined}
+              onClick={() => setTendina(!tendina)}
+            >
+              {t.nav.catalogo}
+              <ChevronDown size={16} strokeWidth={2.4} aria-hidden="true" />
+            </button>
+            {tendina && (
+              <div className="tendina" id="tendina-catalogo" role="group" aria-label={t.header.linee}>
+                {linee.map((l) => {
+                  const href = percorso(lang, `/catalogo/${l.slug}`);
+                  return (
+                    <Link key={l.slug} href={href} aria-current={pathname === href ? "page" : undefined} onClick={chiudiTutto}>
+                      {l.nome}
+                    </Link>
+                  );
+                })}
+                <Link className="tendina-tutte" href={catalogo} aria-current={pathname === catalogo ? "page" : undefined} onClick={chiudiTutto}>
+                  {testi[lang].catalogo.tutteLeLinee}
+                </Link>
+              </div>
+            )}
+          </div>
           {negozio.map((l) => voce(l))}
           <span className="nav-label">{t.header.info}</span>
           {info.map((l) => voce(l, "nav-info"))}

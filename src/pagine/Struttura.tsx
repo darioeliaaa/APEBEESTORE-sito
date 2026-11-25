@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { DemoBanner, Footer } from "@/components/Sections";
 import { LinguaProvider } from "@/i18n/LinguaProvider";
 import type { Lingua } from "@/i18n/testi";
-import { leggiCatalogo } from "@/lib/sheet";
+import { leggiCatalogo, lineeCatalogo } from "@/lib/sheet";
 import "@/app/globals.css";
 
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["700", "800", "900"], variable: "--font-montserrat" });
@@ -21,6 +21,8 @@ export async function Struttura({ lang, children }: { lang: Lingua; children: Re
   const dalFoglio = catalogo ? catalogo.dalFoglio : true;
   // al carrello serve il catalogo di adesso per aggiornare prezzi e disponibilità (le foto no)
   const perCarrello = catalogo ? catalogo.prodotti.map((p) => ({ ...p, immagine: undefined })) : null;
+  // le linee del catalogo (Beyblade X, Pokémon...) per il menu a tendina
+  const linee = catalogo ? lineeCatalogo(catalogo.prodotti).map(({ nome, slug }) => ({ nome, slug })) : [];
   return (
     <html lang={lang} suppressHydrationWarning className={`${montserrat.variable} ${archivo.variable} ${jetbrains.variable}`}>
       <head>
@@ -30,7 +32,7 @@ export async function Struttura({ lang, children }: { lang: Lingua; children: Re
         <LinguaProvider lang={lang}>
           <CartProvider catalogo={perCarrello}>
             <DemoBanner lang={lang} dalFoglio={dalFoglio} />
-            <Header />
+            <Header linee={linee} />
             <main>{children}</main>
             <Footer lang={lang} />
           </CartProvider>

@@ -106,12 +106,22 @@ h1, h2, h3 { text-wrap: balance; }
 .top .wrap { display: flex; align-items: center; gap: 24px; padding-block: 14px; }
 .top .nav .nav-info { color: #d9d7cf; }
 .nav .nav-label { display: block; width: 1px; align-self: stretch; margin-block: 4px; background: #3a3833; font-size: 0; color: transparent; overflow: hidden; }
-@media (max-width: 1320px) { .nav { gap: 16px; margin-left: 0; } .nav a { font-size: 12px; } }
+@media (max-width: 1320px) { .nav { gap: 16px; margin-left: 0; } .nav a, .nav .voce-tendina > button { font-size: 12px; } }
 .logo-white { filter: invert(1); }
 .top .logo img { height: 34px; width: auto; }
 .nav { display: flex; gap: 22px; margin-left: 8px; }
 .nav a { white-space: nowrap; font: 800 13px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; text-decoration: none; color: var(--bianco); padding: 6px 0; border-bottom: 2px solid transparent; }
 .nav a:hover, .nav a[aria-current] { border-bottom-color: var(--honey); }
+/* Catalogo: menu a tendina con le linee */
+.voce-tendina { position: relative; display: flex; align-items: center; }
+.nav .voce-tendina > button { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; border-bottom: 2px solid transparent; padding: 6px 0; color: var(--bianco); font: 800 13px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+.nav .voce-tendina > button:hover, .nav .voce-tendina > button[data-attivo] { border-bottom-color: var(--honey); }
+.voce-tendina > button svg { transition: transform .15s ease; }
+.voce-tendina > button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.tendina { position: absolute; top: calc(100% + 22px); left: -18px; z-index: 25; min-width: 230px; display: flex; flex-direction: column; padding: 6px 0; background: var(--nero); border: 1px solid #2a2925; border-top: 3px solid var(--honey); box-shadow: 0 14px 28px rgba(0, 0, 0, .35); }
+.nav .tendina a { padding: 13px 18px; border-bottom: 0; font-size: 13px; }
+.nav .tendina a:hover, .nav .tendina a[aria-current] { color: var(--honey); border-bottom: 0; }
+.nav .tendina .tendina-tutte { margin-top: 4px; padding-top: 14px; border-top: 1px solid #2a2925; color: #a8a69e; font-size: 12px; }
 .tools { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 /* IT / EN */
 .lang { display: flex; align-items: center; gap: 4px; padding: 0 6px; font: 500 12px/1 var(--font-mono); letter-spacing: .08em; color: #a8a69e; white-space: nowrap; }
@@ -216,6 +226,20 @@ section.block--top .wrap { padding-top: 16px; }
 .pop-sfondo { display: none; }
 .link { background: none; border: 0; padding: 0; font: 700 14px/1 var(--font-body); color: var(--ink); text-decoration: underline; text-decoration-color: var(--honey); text-decoration-thickness: 2px; text-underline-offset: 4px; cursor: pointer; }
 .vuoto { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 32px 0; color: var(--ink-muted); }
+
+/* Catalogo: scelta della linea */
+.linee { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.linea-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; gap: 16px 12px; padding: 16px; background: var(--surface-raised); border-radius: var(--radius-sm); text-decoration: none; transition: box-shadow .12s ease, transform .12s ease; }
+.linea-card:hover { box-shadow: var(--shadow-hard); transform: translate(-2px, -2px); }
+.linea-foto { grid-column: 1 / -1; aspect-ratio: 4 / 3; background: #fff; clip-path: polygon(0 0, calc(100% - var(--cut-md)) 0, 100% var(--cut-md), 100% 100%, 0 100%); display: grid; place-items: center; overflow: hidden; }
+.linea-foto img { width: 100%; height: 100%; object-fit: contain; padding: 8%; }
+.linea-foto--vuota { background: var(--honey); }
+.linea-foto--vuota span { font: 900 clamp(26px, 3vw, 36px)/1 var(--font-display); text-transform: uppercase; color: var(--on-honey); text-align: center; padding: 0 12px; }
+.linea-testo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.linea-testo strong { font: 900 24px/1.1 var(--font-display); text-transform: uppercase; }
+.linea-freccia { align-self: center; font: 900 28px/1 var(--font-display); }
+.page-head .torna { text-decoration: none; width: max-content; }
+.page-head .torna:hover { color: var(--ink); }
 
 /* Link a una pagina info */
 .info-link { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 20px; border: 2px solid var(--ink); text-decoration: none; font-size: 15px; color: var(--ink-muted); transition: box-shadow .12s ease, transform .12s ease; }
@@ -352,6 +376,12 @@ section.block--top .wrap { padding-top: 16px; }
   .nav { display: none; }
   .menu-btn { display: grid; }
   .lang--barra { display: none; }
+  .nav.open .voce-tendina { flex-direction: column; align-items: stretch; }
+  .nav.open .voce-tendina > button { justify-content: space-between; width: 100%; padding: 18px 0; font-size: 15px; border-bottom: 1px solid #2a2925; }
+  .nav.open .voce-tendina > button[data-attivo] { color: var(--honey); border-bottom-color: #2a2925; }
+  .nav.open .tendina { position: static; min-width: 0; padding: 0 0 0 16px; background: none; border: 0; box-shadow: none; }
+  .nav.open .tendina a { padding: 15px 0; font-size: 14px; border-bottom: 1px solid #2a2925; }
+  .nav.open .tendina .tendina-tutte { margin: 0; padding: 15px 0; border-top: 0; font-size: 13px; }
   .nav.open .lang--menu { display: flex; gap: 8px; padding: 18px 0 0; font-size: 14px; }
   .nav.open .lang--menu a { padding: 10px 6px; font: 500 14px/1 var(--font-mono); letter-spacing: .08em; border-bottom: 2px solid transparent; }
   .nav.open .lang--menu a[aria-current] { color: var(--bianco); border-bottom-color: var(--honey); }
@@ -415,6 +445,10 @@ section.block--top .wrap { padding-top: 16px; }
   .step h3 { font-size: 16px; }
   .step p { font-size: 15px; }
   .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .linee { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .linea-card { padding: 12px; }
+  .linea-card:hover { transform: none; box-shadow: none; }
+  .linea-testo strong { font-size: 20px; }
   .toolbar { gap: 8px; }
   .tb-btn { padding: 11px 12px; font-size: 12px; gap: 6px; }
   .tb-count { display: none; }

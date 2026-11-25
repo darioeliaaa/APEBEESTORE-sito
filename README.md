@@ -34,6 +34,11 @@ Le foto del banner in home si prendono dalla scheda **BANNER** dello stesso Goog
 
 Con una foto il banner sta fermo, con due o più scorrono da sole. Le foto ideali sono quadrate (1080×1080); le altre si vedono intere con i lati riempiti dalla stessa foto sfocata. Se la scheda non c'è o è vuota, in home resta il disegno con l'ape.
 
+## Catalogo diviso per linea
+- Ogni linea della colonna "Linea" del foglio (Beyblade X, Pokémon...) ha la sua pagina: `/catalogo/beyblade-x`, `/catalogo/pokemon`. `/catalogo` mostra le linee da scegliere.
+- Nell'header "Catalogo" è un menu a tendina con le linee; sul telefono si apre dentro il menu.
+- Una linea nuova nel foglio compare da sola, nel menu e nel catalogo. Maiuscole e accenti non contano: "pokemon" e "Pokémon" sono la stessa linea.
+
 ## Lingue
 Il sito è in italiano e in inglese. L'italiano sta agli indirizzi di sempre (`/catalogo`), l'inglese sotto `/en` (`/en/catalogo`).
 - Tutti i testi sono in `src/i18n/testi.ts` (le FAQ in `src/i18n/faq.ts`, Chi siamo in `src/pagine/ChiSiamo.tsx`): per cambiare una frase si cambia lì, in tutte e due le lingue.

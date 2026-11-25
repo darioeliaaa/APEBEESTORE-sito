@@ -275,7 +275,7 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
     prodotti.push({
       codice,
       nome: nomeSito,
-      linea: testo(cella(r, c.linea)) || "Beyblade X",
+      linea: nomeLinea(cella(r, c.linea)),
       categoria: categoria(cella(r, c.categoria)),
       prezzo: euro,
       stato,
@@ -402,5 +402,50 @@ export const leggiBanner = cache(async (): Promise<FotoBanner[]> => {
   const righe = await leggiRighe(FOGLIO_BANNER);
   return righe ? righeInBanner(righe).foto.slice(0, 10) : [];
 });
+
+// ---------- linee (Beyblade X, Pokémon...) ----------
+
+// "Pokémon" -> "pokemon", "Beyblade X" -> "beyblade-x": l'indirizzo della linea (/catalogo/pokemon)
+export const slugLinea = (nome: string) =>
+  nome
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+// come si scrivono le linee sul sito, anche se nel foglio sono scritte in minuscolo o senza accento
+const nomiLinee: Record<string, string> = {
+  "beyblade-x": "Beyblade X",
+  pokemon: "Pokémon",
+  "one-piece": "One Piece",
+  "dragon-ball": "Dragon Ball",
+  gundam: "Gundam",
+  "union-arena": "Union Arena",
+  "naruto-kayou": "Naruto Kayou",
+};
+
+// la linea scritta nel foglio, sempre nello stesso modo: "pokemon", "POKEMON" e "Pokémon" sono la stessa
+function nomeLinea(v: unknown) {
+  const s = testo(v).replace(/\s+/g, " ");
+  if (!s) return "Beyblade X";
+  return nomiLinee[slugLinea(s)] ?? s.split(" ").map((p) => (p === p.toLowerCase() ? maiuscola(p) : p)).join(" ");
+}
+
+export type Linea = { nome: string; slug: string; quanti: number; foto?: string };
+
+// le linee che hanno prodotti in catalogo, nell'ordine in cui compaiono nel foglio
+export function lineeCatalogo(prodotti: Prodotto[]): Linea[] {
+  const linee = new Map<string, Linea>();
+  for (const p of prodotti) {
+    if (p.stato !== "ordinazione" && p.stato !== "soldout") continue;
+    const slug = slugLinea(p.linea);
+    const l = linee.get(slug) ?? { nome: p.linea, slug, quanti: 0 };
+    l.quanti++;
+    if (!l.foto && p.immagine && p.stato === "ordinazione") l.foto = p.immagine;
+    linee.set(slug, l);
+  }
+  return [...linee.values()];
+}
 
 export const perStato = (prodotti: Prodotto[], ...stati: Stato[]) => prodotti.filter((p) => stati.includes(p.stato));
