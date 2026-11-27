@@ -17,6 +17,7 @@ export type Prodotto = {
   foto?: string[]; // tutte le foto, se nel foglio ce n'è più di una (la prima è "immagine")
   descrizione?: { it?: string; en?: string }; // colonne facoltative "Descrizione" e "Descrizione EN"
   evidenza?: boolean; // colonna facoltativa "In evidenza": con la spunta il prodotto va in home
+  rilascio?: string; // data di uscita in Giappone "2026-12-26" (colonna "Data uscita" o data del preordine): per ordinare il catalogo
 };
 
 

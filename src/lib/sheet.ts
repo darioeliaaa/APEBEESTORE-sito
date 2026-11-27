@@ -274,6 +274,8 @@ export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { pr
     // così "Grip - 1/2" resta com'è
     let nomeGrezzo = testo(cella(r, c.nome));
     let uscita: string | undefined;
+    // la data di uscita resta anche dopo che il preordine è uscito: serve per ordinare il catalogo per data
+    let rilascio: string | undefined;
     if (stato === "preordine") {
       const d = nomeGrezzo.match(dataInFondo);
       const dalNome = d ? data(d[1]) : undefined;
@@ -282,6 +284,7 @@ export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { pr
       if (dallaColonna === null) avvisa(`data di uscita «${testo(cella(r, c.uscita))}» non valida`);
       uscita = dallaColonna || dalNome || undefined;
       if (!uscita && dallaColonna !== null) avvisa("preordine senza data di uscita");
+      rilascio = uscita;
       // passata la data di uscita il preordine diventa da solo "su ordinazione" (il giorno dopo l'uscita)
       if (uscita && uscita < oggi) {
         const [a, m, g] = uscita.split("-");
@@ -289,6 +292,11 @@ export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { pr
         stato = "ordinazione";
         uscita = undefined;
       }
+    } else {
+      // colonna facoltativa "Data uscita" anche per gli altri prodotti: se c'è, il catalogo si può ordinare per data
+      const dallaColonna = data(cella(r, c.uscita));
+      if (dallaColonna === null) avvisa(`data di uscita «${testo(cella(r, c.uscita))}» non valida`);
+      rilascio = dallaColonna || undefined;
     }
 
     // più foto nella stessa cella, separate da virgola, spazio o a capo: la prima è quella della card
@@ -321,6 +329,7 @@ export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { pr
       ...(buone.length > 1 ? { foto: buone } : {}),
       ...(descrizione.it || descrizione.en ? { descrizione } : {}),
       ...(evidenza ? { evidenza: true } : {}),
+      ...(rilascio ? { rilascio } : {}),
     });
   });
 

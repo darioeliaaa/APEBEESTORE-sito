@@ -22,7 +22,7 @@ function albero(prodotti: Prodotto[]) {
 const chiave = (linea: string, categoria: string) => `${linea}/${categoria}`;
 
 // i nomi da mostrare sono nel dizionario (src/i18n/testi.ts)
-const ordini = [{ id: "consigliati" }, { id: "prezzo-su" }, { id: "prezzo-giu" }, { id: "nome" }] as const;
+const ordini = [{ id: "consigliati" }, { id: "uscita" }, { id: "prezzo-su" }, { id: "prezzo-giu" }, { id: "nome" }] as const;
 
 const fasce = [
   { id: "tutte", min: 0, max: Infinity },
@@ -99,6 +99,8 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
       if (ordine === "prezzo-su") return a.prezzo - b.prezzo;
       if (ordine === "prezzo-giu") return b.prezzo - a.prezzo;
       if (ordine === "nome") return a.nome.localeCompare(b.nome, lang);
+      // dalla data di uscita più recente; i prodotti senza data vanno in fondo, nell'ordine del foglio
+      if (ordine === "uscita") return a.rilascio && b.rilascio ? b.rilascio.localeCompare(a.rilascio) : a.rilascio ? -1 : b.rilascio ? 1 : 0;
       return 0;
     });
 
