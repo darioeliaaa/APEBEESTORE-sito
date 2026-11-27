@@ -29,7 +29,7 @@ export async function Recensioni({ lang }: { lang: Lingua }) {
             </a>
             <a className="recensioni-fonte" href={COMMUNITY} target="_blank" rel="noopener noreferrer">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/recensioni/community.jpg" alt={t.fotoWhatsapp} width={674} height={1408} loading="lazy" />
+              <img src="/recensioni/community.jpg" alt={t.fotoWhatsapp} width={900} height={1125} loading="lazy" />
               <span className="btn btn--ghost">{t.whatsapp}</span>
             </a>
           </div>
