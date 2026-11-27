@@ -215,7 +215,7 @@ export function CartProvider({ catalogo, children }: { catalogo: Prodotto[] | nu
         return;
       }
       // nel carrello vanno solo i dati che servono (niente descrizioni e foto in più)
-      const { foto, descrizione, ...leggero } = p; // eslint-disable-line @typescript-eslint/no-unused-vars
+      const { foto, descrizione, evidenza, ...leggero } = p; // eslint-disable-line @typescript-eslint/no-unused-vars
       const gia = righe.find((r) => r.p.codice === p.codice);
       if (gia && gia.qta >= MAX_QTA) {
         show(t.carrello.massimo(MAX_QTA));

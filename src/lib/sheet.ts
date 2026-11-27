@@ -122,6 +122,8 @@ function colonne(intestazione: unknown[]) {
     // facoltative: il testo sotto la foto nella pagina del prodotto
     descrizione: nomi.findIndex((n) => n === "descrizione" || n === "descrizioneit"),
     descrizioneEn: nomi.findIndex((n) => n === "descrizioneen" || n === "description"),
+    // facoltativa: con la spunta il prodotto va in home
+    evidenza: nomi.findIndex((n) => n === "inevidenza" || n === "evidenza"),
   };
   // senza queste il sito non può funzionare: meglio fermarsi che pubblicare un catalogo sbagliato
   const servono = { codice: "Codice", nome: "Nome", stato: "Stato", prezzo: "Prezzo pubblico" } as const;
@@ -281,6 +283,11 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
     if (foto.some((f) => !f.startsWith("https://"))) avvisa("il link della foto deve iniziare con https://");
     const buone = foto.filter((f) => f.startsWith("https://")).map(linkFoto);
     const nomeSito = nome(nomeGrezzo, codice);
+    // in home vanno solo prodotti su ordinazione e preordini: sugli altri la spunta non fa niente
+    const evidenza = c.evidenza >= 0 && attivo(cella(r, c.evidenza));
+    if (evidenza && (stato === "soldout" || stato === "riscatto")) {
+      avvisa(`«In evidenza» vale solo per prodotti disponibili o in preordine (questo è ${statoScritto})`);
+    }
     const descrizione = { it: testo(cella(r, c.descrizione)) || undefined, en: testo(cella(r, c.descrizioneEn)) || undefined };
 
     prodotti.push({
@@ -294,6 +301,7 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
       immagine: buone[0],
       ...(buone.length > 1 ? { foto: buone } : {}),
       ...(descrizione.it || descrizione.en ? { descrizione } : {}),
+      ...(evidenza ? { evidenza: true } : {}),
     });
   });
 

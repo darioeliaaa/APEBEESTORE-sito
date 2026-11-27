@@ -48,6 +48,12 @@ Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: p
 - Nella colonna Immagine si possono mettere più foto, separate da virgola o a capo: la prima è quella della card, le altre compaiono come miniature.
 - Colonne facoltative **Descrizione** e **Descrizione EN**: se ci sono, il testo compare sotto il prezzo.
 
+## Home
+- **In evidenza**: colonna facoltativa **In evidenza** nel foglio CATALOGO, con la casella di spunta (vanno bene anche "si" o "x"). I prodotti disponibili con la spunta vanno in home, nell'ordine del foglio (massimo 8, meglio 4 o 8 così le file sono piene). Se nessuno ha la spunta vanno i primi 4 disponibili.
+  - La colonna va in **R** (dopo il cambio e il ricarico in P e Q), non in mezzo: lo script dei prezzi usa le colonne A–N e le celle Q2 e Q3 per posizione.
+- **Preordini aperti**: fino a 4 preordini, prima quelli con la spunta in "In evidenza". Se non ci sono preordini la fila non si vede.
+- **Recensioni**: in fondo le ultime 3 recensioni approvate della scheda RECENSIONI, con il link alla pagina Recensioni. Se non ce ne sono la fila non si vede.
+
 ## Catalogo diviso per linea
 - Ogni linea della colonna "Linea" del foglio (Beyblade X, Pokémon...) ha la sua pagina: `/catalogo/beyblade-x`, `/catalogo/pokemon`. `/catalogo` mostra le linee da scegliere.
 - Nell'header "Catalogo" è un menu a tendina con le linee; sul telefono si apre dentro il menu.

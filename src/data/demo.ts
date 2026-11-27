@@ -16,6 +16,7 @@ export type Prodotto = {
   immagine?: string; // link della foto
   foto?: string[]; // tutte le foto, se nel foglio ce n'è più di una (la prima è "immagine")
   descrizione?: { it?: string; en?: string }; // colonne facoltative "Descrizione" e "Descrizione EN"
+  evidenza?: boolean; // colonna facoltativa "In evidenza": con la spunta il prodotto va in home
 };
 
 

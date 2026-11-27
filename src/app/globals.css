@@ -362,6 +362,11 @@ section.block--top .wrap { padding-top: 16px; }
 .recensione-chi strong { color: var(--ink); font-family: var(--font-display); font-weight: 800; }
 .recensione-prodotto { text-decoration: none; width: max-content; max-width: 100%; }
 a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; text-decoration-color: var(--honey); }
+/* in home: le ultime 3, su tre colonne; sullo sfondo chiaro le card restano staccate */
+.raised .recensione { background: var(--surface); }
+.recensioni--home { grid-template-columns: repeat(3, minmax(0, 1fr)); justify-content: stretch; }
+.recensioni--home .recensione-foto img { max-height: 380px; }
+@media (max-width: 960px) { .recensioni--home { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); } }
 
 /* Community */
 .community { background: var(--honey); color: var(--on-honey); }
