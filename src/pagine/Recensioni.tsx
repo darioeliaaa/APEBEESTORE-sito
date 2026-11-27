@@ -3,11 +3,10 @@ import { ScriviRecensione } from "@/components/ScriviRecensione";
 import { PageHead } from "@/components/Sections";
 import { testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, leggiRecensioni } from "@/lib/sheet";
+import { COMMUNITY } from "@/lib/whatsapp";
 
 // Pagina Recensioni: in alto i link ai feedback su Instagram e nella community, poi il modulo
 // per lasciarne una (con le stelle) e sotto tutte le recensioni della scheda RECENSIONI, dalla più recente.
-
-const COMMUNITY = "https://chat.whatsapp.com/LF8noghO9bWJ9KwvwKApue";
 
 export async function Recensioni({ lang }: { lang: Lingua }) {
   const t = testi[lang].recensioni;
@@ -29,7 +28,7 @@ export async function Recensioni({ lang }: { lang: Lingua }) {
             </a>
             <a className="recensioni-fonte" href={COMMUNITY} target="_blank" rel="noopener noreferrer">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/recensioni/community.jpg" alt={t.fotoWhatsapp} width={900} height={1125} loading="lazy" />
+              <img src="/recensioni/community.jpg" alt={t.fotoWhatsapp} width={674} height={1408} loading="lazy" />
               <span className="btn btn--ghost">{t.whatsapp}</span>
             </a>
           </div>

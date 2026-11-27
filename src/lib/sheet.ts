@@ -223,7 +223,10 @@ export function data(v: unknown, oggi = new Date()): string | undefined | null {
 // data scritta in fondo al nome: "Random Booster · 26/12/2026"
 const dataInFondo = /\s*[·•\-–]\s*(\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)\s*$/;
 
-export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; problemi: Problema[] } {
+// la data di oggi in Italia, "2026-12-27" (il server di Vercel ha un altro fuso orario)
+const oggiInItalia = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
+
+export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { prodotti: Prodotto[]; problemi: Problema[] } {
   const [intestazione, ...dati] = righe;
   if (!intestazione) throw new Error("Il foglio è vuoto");
   const c = colonne(intestazione);
@@ -246,7 +249,7 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
     if (visti.has(chiaveCodice)) return scarta(`il codice ${codice} c'è già alla riga ${visti.get(chiaveCodice)}`);
 
     const statoScritto = testo(cella(r, c.stato));
-    const stato = stati[pulisci(statoScritto)];
+    let stato = stati[pulisci(statoScritto)];
     if (!statoScritto) return scarta("manca lo stato");
     if (!stato) return scarta(`stato «${statoScritto}» non valido (usa Disponibile, Preordine, Sold out o Riscatta)`);
 
@@ -272,6 +275,13 @@ export function righeInProdotti(righe: unknown[][]): { prodotti: Prodotto[]; pro
       if (dallaColonna === null) avvisa(`data di uscita «${testo(cella(r, c.uscita))}» non valida`);
       uscita = dallaColonna || dalNome || undefined;
       if (!uscita && dallaColonna !== null) avvisa("preordine senza data di uscita");
+      // passata la data di uscita il preordine diventa da solo "su ordinazione" (il giorno dopo l'uscita)
+      if (uscita && uscita < oggi) {
+        const [a, m, g] = uscita.split("-");
+        avvisa(`uscito il ${g}/${m}/${a}: sul sito ora è "su ordinazione", nel foglio puoi mettere Disponibile`);
+        stato = "ordinazione";
+        uscita = undefined;
+      }
     }
 
     // più foto nella stessa cella, separate da virgola, spazio o a capo: la prima è quella della card

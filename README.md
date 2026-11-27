@@ -59,6 +59,12 @@ Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: p
 - Nell'header "Catalogo" è un menu a tendina con le linee; sul telefono si apre dentro il menu.
 - Una linea nuova nel foglio compare da sola, nel menu e nel catalogo. Maiuscole e accenti non contano: "pokemon" e "Pokémon" sono la stessa linea.
 
+## Preordini
+- Il giorno dopo la data di uscita il preordine diventa da solo "su ordinazione" sul sito, anche se nel foglio c'è ancora scritto Preordine. La pagina `/controllo` lo segnala, così nel foglio si può mettere Disponibile.
+
+## Tasto della community
+- In tutte le pagine, in basso a destra, c'è un tasto rotondo con l'icona di WhatsApp che porta al gruppo della community (link in `src/lib/whatsapp.ts`).
+
 ## Ordini
 - Carrello → `/ordine` (dati del cliente) → **Conferma l'ordine**: il sito manda l'ordine allo script di Nicholas (`/api/ordine`), che lo salva nella scheda Ordini del foglio, manda le email e risponde con il numero ORD-….
 - Poi il tasto **Invia su WhatsApp** apre la chat con Nicholas con il messaggio già scritto, per il pagamento.

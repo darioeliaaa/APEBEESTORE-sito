@@ -368,6 +368,12 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
 .recensioni--home .recensione-foto img { max-height: 380px; }
 @media (max-width: 960px) { .recensioni--home { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); } }
 
+/* tasto fisso della community WhatsApp, in basso a destra (sotto carrello, ricerca e avvisi) */
+.tasto-community { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 30; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--honey); color: var(--on-honey); border: 2px solid var(--nero); box-shadow: 3px 3px 0 var(--nero); transition: transform .12s ease, box-shadow .12s ease; }
+.tasto-community:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--nero); }
+.tasto-community:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+@media print { .tasto-community { display: none; } }
+
 /* Community */
 .community { background: var(--honey); color: var(--on-honey); }
 .community .wrap { padding-block: 80px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; }
@@ -394,7 +400,7 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
 
 /* Footer */
 .footer { background: var(--nero); color: #d9d7cf; }
-.footer .wrap { padding-block: 48px 32px; display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
+.footer .wrap { padding-block: 48px 96px; display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
 .footer .logo img { height: 40px; width: auto; }
 .footer h3 { font: 500 12px/16px var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: #a8a69e; margin-bottom: 12px; }
 .footer ul { display: flex; flex-direction: column; gap: 2px; }
@@ -451,7 +457,14 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
 .scrivi-recensione { max-width: 720px; padding: 28px; background: var(--surface-raised); border-top: 4px solid var(--honey); display: flex; flex-direction: column; gap: 16px; }
 .scrivi-recensione h2 { font: 900 28px/1.1 var(--font-display); text-transform: uppercase; }
 .scrivi-recensione form { display: flex; flex-direction: column; gap: 16px; }
-.scrivi-recensione .campo-aiuto { margin-top: -8px; }
+/* chiuso: solo il titolo con il tasto di fianco; il modulo si apre col tasto */
+.scrivi-testa { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.scrivi-recensione--chiusa { padding-block: 20px; }
+.scrivi-testa .btn { align-self: center; }
+.scrivi-testa { flex-wrap: nowrap; }
+.scrivi-recensione--chiusa .scrivi-testa { flex-wrap: wrap; }
+.scrivi-chiudi { color: var(--ink); flex: none; margin: -8px -8px 0 0; }
+.scrivi-chiudi:hover { background: var(--surface-muted); }
 .scrivi-recensione .btn { align-self: flex-start; }
 .scrivi-testo { color: var(--ink-muted); }
 .scrivi-grazie { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; font-weight: 600; outline: none; }
@@ -647,6 +660,7 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
   .recensione { padding: 12px; }
   .scrivi-recensione { padding: 20px 16px; }
   .scrivi-recensione .btn { align-self: stretch; }
+  .scrivi-testa .btn { flex: 1 1 100%; }
   /* sul telefono le due schede restano affiancate, più piccole */
   .recensioni-link { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .recensioni-fonte { gap: 8px; }
@@ -664,7 +678,7 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
   .pop { position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: auto; max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain; z-index: 46; border-width: 2px 0 0; box-shadow: none; padding: 20px 20px 0; }
   .pop-foot { position: sticky; bottom: 0; background: var(--surface); margin: 0 -20px; padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px)); }
   .pop-sfondo { display: block; position: fixed; inset: 0; z-index: 45; background: rgba(14, 14, 12, .55); }
-  .footer .wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 12px; padding-block: 40px 28px; }
+  .footer .wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 12px; padding-block: 40px 96px; }
   .footer ul { font-size: 14px; }
   .footer .tagline { font-size: 18px; margin-top: 12px; }
   section.block .wrap { padding-block: 64px; gap: 28px; }
@@ -693,9 +707,9 @@ a.recensione-prodotto:hover { color: var(--ink); text-decoration: underline; tex
   .cerca-azione { grid-column: 2; flex-direction: row; align-items: center; justify-content: space-between; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .btn, .card, .toast, .recensioni-fonte img { transition: none; }
+  .btn, .card, .toast, .recensioni-fonte img, .tasto-community { transition: none; }
   .recensioni-fonte:hover img { transform: none; }
-  .btn:hover, .card:hover { transform: none; }
+  .btn:hover, .card:hover, .tasto-community:hover { transform: none; }
   .hero-art .bee { animation: none; }
   .banner-dot span { transition: none; }
 }

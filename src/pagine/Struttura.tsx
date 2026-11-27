@@ -1,7 +1,7 @@
 import { Archivo, JetBrains_Mono, Montserrat } from "next/font/google";
 import { CartProvider } from "@/components/CartProvider";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Sections";
+import { Footer, TastoCommunity } from "@/components/Sections";
 import { LinguaProvider } from "@/i18n/LinguaProvider";
 import type { Lingua } from "@/i18n/testi";
 import { leggiCatalogo, lineeCatalogo } from "@/lib/sheet";
@@ -34,6 +34,7 @@ export async function Struttura({ lang, nonTrovata, children }: { lang: Lingua; 
             <Header linee={linee} nonTrovata={nonTrovata} />
             <main>{children}</main>
             <Footer lang={lang} />
+            <TastoCommunity lang={lang} />
           </CartProvider>
         </LinguaProvider>
       </body>

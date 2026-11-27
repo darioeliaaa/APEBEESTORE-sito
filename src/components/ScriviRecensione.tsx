@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, X } from "lucide-react";
 import { useLingua } from "@/i18n/LinguaProvider";
 
 // Modulo "Lascia una recensione": la recensione va allo script di Nicholas, che la scrive nella scheda
@@ -18,10 +18,12 @@ export function ScriviRecensione() {
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
   const [fatto, setFatto] = useState(false);
+  const [aperto, setAperto] = useState(false); // il modulo si apre con il tasto "Scrivi la recensione"
   const [sopra, setSopra] = useState(0); // stella sotto il mouse, per far vedere il voto prima del clic
   const trappola = useRef<HTMLInputElement>(null);
   const modulo = useRef<HTMLFormElement>(null);
   const grazie = useRef<HTMLDivElement>(null);
+  const tastoApri = useRef<HTMLButtonElement>(null);
 
   const imposta = <K extends keyof Dati>(k: K, v: Dati[K]) => {
     setD((x) => ({ ...x, [k]: v }));
@@ -65,10 +67,35 @@ export function ScriviRecensione() {
     }
   }
 
+  function apri() {
+    setAperto(true);
+    // aperto il modulo, il cursore va sulla prima stella
+    setTimeout(() => modulo.current?.querySelector<HTMLElement>('input[name="voto"]')?.focus(), 0);
+  }
+
+  function chiudi() {
+    // quello che hai scritto resta, se lo riapri lo ritrovi
+    setAperto(false);
+    setFatto(false);
+    setErrore("");
+    setTimeout(() => tastoApri.current?.focus(), 0);
+  }
+
   return (
-    <section className="scrivi-recensione" aria-labelledby="scrivi-recensione">
-      <h2 id="scrivi-recensione">{s.titolo}</h2>
-      {fatto ? (
+    <section className={`scrivi-recensione${aperto ? "" : " scrivi-recensione--chiusa"}`} aria-labelledby="scrivi-recensione">
+      <div className="scrivi-testa">
+        <h2 id="scrivi-recensione">{s.titolo}</h2>
+        {aperto ? (
+          <button type="button" className="icon-btn scrivi-chiudi" aria-label={s.chiudi} onClick={chiudi}>
+            <X size={22} strokeWidth={2} aria-hidden="true" />
+          </button>
+        ) : (
+          <button ref={tastoApri} type="button" className="btn btn--primary" aria-expanded={false} aria-controls="modulo-recensione" onClick={apri}>
+            {s.apri}
+          </button>
+        )}
+      </div>
+      {!aperto ? null : fatto ? (
         <div className="scrivi-grazie" ref={grazie} tabIndex={-1} role="status">
           <p>{s.grazie}</p>
           <button type="button" className="link" onClick={() => setFatto(false)}>
@@ -76,7 +103,7 @@ export function ScriviRecensione() {
           </button>
         </div>
       ) : (
-        <form ref={modulo} noValidate onSubmit={(e) => (e.preventDefault(), manda())}>
+        <form id="modulo-recensione" ref={modulo} noValidate onSubmit={(e) => (e.preventDefault(), manda())}>
           <p className="scrivi-testo">{s.testo}</p>
           {/* stelle: sono 5 radio, quindi si scelgono anche con le frecce della tastiera */}
           <fieldset className={`stelle-scelta${errori.voto ? " campo--errore" : ""}`}>
@@ -103,7 +130,6 @@ export function ScriviRecensione() {
               <input name="citta" value={d.citta} onChange={(e) => imposta("citta", e.target.value)} autoComplete="address-level2" maxLength={60} />
             </label>
           </div>
-          <p className="campo-aiuto">{s.nomeAiuto}</p>
           <label className="campo">
             <span>{s.prodotto}</span>
             <input name="prodotto" value={d.prodotto} onChange={(e) => imposta("prodotto", e.target.value)} placeholder={s.prodottoEsempio} maxLength={60} />
