@@ -19,7 +19,7 @@ const testa = {
 export function ChiSiamo({ lang }: { lang: Lingua }) {
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <PageHead label="APEBEESTORE" titolo={testa[lang].titolo} testo={testa[lang].testo} stretto />
       {lang === "en" ? <TestoEn /> : <TestoIt />}
       <Contatti lang={lang} />

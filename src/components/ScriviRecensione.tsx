@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Star, X } from "lucide-react";
 import { useLingua } from "@/i18n/LinguaProvider";
+import { ControlloRobot, type Robot } from "./ControlloRobot";
 
 // Modulo "Lascia una recensione": la recensione va allo script di Nicholas, che la scrive nella scheda
 // RECENSIONI del foglio con Attivo spento. Sul sito compare solo quando lui mette la spunta.
@@ -21,6 +22,7 @@ export function ScriviRecensione() {
   const [aperto, setAperto] = useState(false); // il modulo si apre con il tasto "Scrivi la recensione"
   const [sopra, setSopra] = useState(0); // stella sotto il mouse, per far vedere il voto prima del clic
   const trappola = useRef<HTMLInputElement>(null);
+  const robot = useRef<Robot>(null);
   const modulo = useRef<HTMLFormElement>(null);
   const grazie = useRef<HTMLDivElement>(null);
   const tastoApri = useRef<HTMLButtonElement>(null);
@@ -46,11 +48,13 @@ export function ScriviRecensione() {
     if (!navigator.onLine) return setErrore(s.offline);
     setInvio(true);
     try {
+      const codiceRobot = (await robot.current?.aspetta()) ?? "";
       const res = await fetch("/api/recensione", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...d, lingua: lang, sito: trappola.current?.value ?? "" }),
+        body: JSON.stringify({ ...d, lingua: lang, sito: trappola.current?.value ?? "", robot: codiceRobot }),
       });
+      robot.current?.reset();
       const r = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErrore(r.errore ?? s.erroreGenerico);
@@ -148,6 +152,7 @@ export function ScriviRecensione() {
           </label>
           {/* campo nascosto contro lo spam: le persone non lo vedono */}
           <input ref={trappola} className="trappola" type="text" name="sito" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+          <ControlloRobot lang={lang} ref={robot} />
           {errore && (
             <p className="ordine-errori" role="alert">
               {errore}

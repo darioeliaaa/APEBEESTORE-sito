@@ -572,6 +572,8 @@ main:focus { outline: none; }
 .riepilogo-email li { grid-template-columns: minmax(0, 1fr) auto; }
 .riepilogo-email p { margin: 0; color: var(--ink-muted); }
 .trappola { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+/* controllo anti-robot: di solito vuoto, la casella compare solo se Cloudflare ha dei dubbi */
+.robot:not(:empty) { margin-block: 8px; }
 .ordine-pronto { max-width: 646px; /* largo come il testo sopra */ display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding: 28px; background: var(--surface-raised); border-top: 4px solid var(--honey); }
 .ordine-pronto-tasti { display: flex; flex-wrap: wrap; gap: 12px; width: 100%; }
 .ordine-pronto-tasti .ordine-invia { flex: 1 1 280px; }

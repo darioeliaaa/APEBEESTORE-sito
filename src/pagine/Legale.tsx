@@ -427,6 +427,10 @@ function PrivacyIt() {
             <li>Google, dove salviamo gli ordini (Google Sheets) e da cui partono le email di riepilogo (Gmail);</li>
             <li>Vercel, la società che ospita il sito;</li>
             <li>
+              Cloudflare, che controlla che ordini e recensioni li mandi una persona e non un programma (riceve dati tecnici
+              del browser, come l&apos;indirizzo IP);
+            </li>
+            <li>
               WhatsApp (Meta), quando ci scrivi o ci mandi l&apos;ordine: in quel caso vale anche l&apos;informativa di
               WhatsApp;
             </li>
@@ -542,6 +546,10 @@ function PrivacyEn() {
             <li>us, to handle orders;</li>
             <li>Google, where we store orders (Google Sheets) and from which summary emails are sent (Gmail);</li>
             <li>Vercel, the company that hosts the site;</li>
+            <li>
+              Cloudflare, which checks that orders and reviews are sent by a person and not a program (it receives technical
+              browser data, such as the IP address);
+            </li>
             <li>WhatsApp (Meta), when you message us or send us your order: WhatsApp&apos;s privacy policy also applies;</li>
             <li>couriers, only the details needed for delivery;</li>
             <li>our accountant, for tax obligations.</li>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { chiamaScript, scriptPronto } from "@/lib/ordini";
+import { nonRobot } from "@/lib/robot";
 
 // Riceve la recensione dal modulo della pagina Recensioni e la passa allo script di Nicholas,
 // che la scrive nella scheda RECENSIONI con Attivo spento: sul sito compare solo dopo l'approvazione.
@@ -12,6 +13,7 @@ const messaggi = {
     consenso: "Serve la spunta per pubblicare la recensione.",
     voto: "Scegli da 1 a 5 stelle.",
     troppe: "Hai già mandato una recensione: riprova più tardi.",
+    robot: "Il controllo anti-robot non è andato: ricarica la pagina e riprova.",
     nonAttivo: "Le recensioni dal sito non sono ancora attive.",
     nonRisponde: "Non siamo riusciti a mandare la recensione. Riprova tra poco.",
   },
@@ -22,6 +24,7 @@ const messaggi = {
     consenso: "Please tick the box to publish your review.",
     voto: "Please choose from 1 to 5 stars.",
     troppe: "You've already sent a review: try again later.",
+    robot: "The anti-bot check didn't pass: reload the page and try again.",
     nonAttivo: "Reviews from the site are not active yet.",
     nonRisponde: "We couldn't send your review. Please try again shortly.",
   },
@@ -41,6 +44,8 @@ const testo = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/\
 const errore = (msg: string, stato = 400) => NextResponse.json({ errore: msg }, { status: stato });
 
 export async function POST(req: Request) {
+  // solo JSON: così un altro sito non può far partire ordini o recensioni dal browser di chi lo visita
+  if (!(req.headers.get("content-type") ?? "").includes("application/json")) return errore(messaggi.it.illeggibile, 415);
   const grezzo = await req.text();
   let o: Record<string, unknown>;
   try {
@@ -62,6 +67,7 @@ export async function POST(req: Request) {
   if (o.consenso !== true) return errore(m.consenso);
 
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "sconosciuto";
+  if (!(await nonRobot(o.robot, ip))) return errore(m.robot, 403);
   if (troppe(ip)) return errore(m.troppe, 429);
   if (!scriptPronto()) return errore(m.nonAttivo, 503);
 

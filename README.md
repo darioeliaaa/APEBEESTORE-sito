@@ -72,6 +72,11 @@ Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: p
 - Il link "riepilogo" nelle email porta a `/riepilogo?order=…&t=…`, che legge l'ordine dallo script.
 - Come pubblicare lo script: `../script-sito/COME-PUBBLICARE.md`.
 
+## Protezioni contro lo spam
+- Ordini e recensioni hanno un campo nascosto (i programmi lo riempiono, le persone no) e un limite per indirizzo: 5 ordini ogni 10 minuti, 3 recensioni l'ora. La stessa email può fare al massimo 5 ordini l'ora.
+- Controllo anti-robot di Cloudflare (Turnstile): si accende mettendo su Vercel `NEXT_PUBLIC_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` (dashboard Cloudflare → Turnstile → aggiungi il sito, modalità "Managed"). Di solito il cliente non vede niente; se Cloudflare ha dei dubbi compare una casella. Senza le due chiavi è spento.
+- La pagina `/controllo` si blocca per 15 minuti dopo 10 password sbagliate dallo stesso indirizzo.
+
 ## Lingue
 Il sito è in italiano e in inglese. L'italiano sta agli indirizzi di sempre (`/catalogo`), l'inglese sotto `/en` (`/en/catalogo`).
 - Tutti i testi sono in `src/i18n/testi.ts` (le FAQ in `src/i18n/faq.ts`, Chi siamo in `src/pagine/ChiSiamo.tsx`): per cambiare una frase si cambia lì, in tutte e due le lingue.

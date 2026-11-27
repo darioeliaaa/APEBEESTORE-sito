@@ -10,6 +10,7 @@ import { copia } from "@/lib/copia";
 import { euro, giorno } from "@/lib/format";
 import { NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
 import { useCart, type Riga } from "./CartProvider";
+import { ControlloRobot, type Robot } from "./ControlloRobot";
 import { PageHead } from "./Sections";
 
 // Pagina dell'ordine, in due passi:
@@ -128,6 +129,7 @@ export function Ordine() {
   const [offline, setOffline] = useState(false);
   const [copiato, setCopiato] = useState(false);
   const trappola = useRef<HTMLInputElement>(null);
+  const robot = useRef<Robot>(null);
   const modulo = useRef<HTMLFormElement>(null);
 
   // il codice si crea nel browser, così è diverso per ogni ordine
@@ -215,6 +217,7 @@ export function Ordine() {
     let numero = "";
     let totaleScript: number | undefined;
     try {
+      const codiceRobot = (await robot.current?.aspetta()) ?? "";
       const res = await fetch("/api/ordine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -224,8 +227,10 @@ export function Ordine() {
           dati: { ...d, codiceApp: sistemaCodiceApp(d.codiceApp) ?? d.codiceApp },
           lingua: lang,
           sito: trappola.current?.value ?? "",
+          robot: codiceRobot,
         }),
       });
+      robot.current?.reset();
       const r = await res.json().catch(() => ({}));
       if (res.ok) {
         numero = r.numero;
@@ -524,6 +529,7 @@ export function Ordine() {
 
         {/* campo nascosto contro lo spam: le persone non lo vedono */}
         <input ref={trappola} className="trappola" type="text" name="sito" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+        <ControlloRobot lang={lang} ref={robot} />
 
         <button className="btn btn--primary ordine-invia" type="button" onClick={conferma} disabled={invio} aria-busy={invio}>
           {invio ? o.invio : o.invia}

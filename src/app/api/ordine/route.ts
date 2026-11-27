@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sistemaCodiceApp } from "@/lib/codiceApp";
 import { leggiCatalogo } from "@/lib/sheet";
+import { nonRobot } from "@/lib/robot";
 import { chiamaScript, scriptPronto } from "@/lib/ordini";
 
 // Riceve l'ordine dalla pagina /ordine, ricontrolla tutto con il catalogo di adesso
@@ -16,6 +17,17 @@ function troppi(ip: string) {
   const recenti = (invii.get(ip) ?? []).filter((t) => ora - t < 10 * 60 * 1000);
   recenti.push(ora);
   invii.set(ip, recenti);
+  return recenti.length > 5;
+}
+
+// la stessa email al massimo in 5 ordini all'ora: così nessuno può usare l'email di un altro
+// per fargli arrivare decine di email di conferma
+const perEmail = new Map<string, number[]>();
+function troppiPerEmail(email: string) {
+  const ora = Date.now();
+  const recenti = (perEmail.get(email) ?? []).filter((t) => ora - t < 60 * 60 * 1000);
+  recenti.push(ora);
+  perEmail.set(email, recenti);
   return recenti.length > 5;
 }
 
@@ -41,6 +53,8 @@ const messaggi = {
     codiceAppFormato: "Il codice dell'app non è valido: sono 12 lettere e numeri, tipo AB12-CD34-EF56.",
     prezzi: "Nel frattempo alcuni prezzi sono cambiati: controlla il totale e premi di nuovo il tasto per confermare.",
     troppi: "Troppi ordini in poco tempo: riprova tra qualche minuto.",
+    troppiEmail: "Troppi ordini con questa email in poco tempo: riprova più tardi o scrivici su WhatsApp.",
+    robot: "Il controllo anti-robot non è andato: ricarica la pagina e riprova.",
     nonAttivo: "Il salvataggio degli ordini non è ancora attivo.",
     nonSalvato: "Ordine non salvato.",
     nonRisponde: "Il salvataggio degli ordini non risponde.",
@@ -62,6 +76,8 @@ const messaggi = {
     codiceAppFormato: "The app code isn't valid: it's 12 letters and numbers, like AB12-CD34-EF56.",
     prezzi: "Some prices have changed in the meantime: check the total and press the button again to confirm.",
     troppi: "Too many orders in a short time: try again in a few minutes.",
+    troppiEmail: "Too many orders with this email in a short time: try again later or message us on WhatsApp.",
+    robot: "The anti-bot check didn't pass: reload the page and try again.",
     nonAttivo: "Order saving is not active yet.",
     nonSalvato: "Order not saved.",
     nonRisponde: "Order saving is not responding.",
@@ -69,6 +85,8 @@ const messaggi = {
 };
 
 export async function POST(req: Request) {
+  // solo JSON: così un altro sito non può far partire ordini o recensioni dal browser di chi lo visita
+  if (!(req.headers.get("content-type") ?? "").includes("application/json")) return errore(messaggi.it.illeggibile, 415);
   const grezzo = await req.text();
   if (grezzo.length > 20000) return errore(messaggi.it.grande);
   let o: Record<string, unknown>;
@@ -124,7 +142,9 @@ export async function POST(req: Request) {
 
   // conto solo gli ordini validi, così chi corregge un errore non viene bloccato
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "sconosciuto";
+  if (!(await nonRobot(o.robot, ip))) return errore(m.robot, 403);
   if (troppi(ip)) return errore(m.troppi, 429);
+  if (troppiPerEmail(testo(d.email).toLowerCase())) return errore(m.troppiEmail, 429);
 
   if (!scriptPronto()) return errore(m.nonAttivo, 503);
 

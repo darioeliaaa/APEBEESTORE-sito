@@ -43,9 +43,11 @@ const testi = {
 };
 
 async function leggi(order?: string, token?: string): Promise<Riepilogo | null> {
+  // il link dell'email è sempre ORD-0188 e 20 lettere/numeri: tutto il resto non lo mando neanche allo script
   if (!order || !token || !scriptPronto()) return null;
+  if (!/^ORD-\d{4,8}$/.test(order) || !/^[0-9a-f]{20}$/.test(token)) return null;
   try {
-    const r = await chiamaScript({ azione: "riepilogo", order: order.slice(0, 20), token: token.slice(0, 40) });
+    const r = await chiamaScript({ azione: "riepilogo", order, token });
     return r.success && r.recap ? r.recap : null;
   } catch {
     return null;
