@@ -32,6 +32,7 @@ export const faqIt: GruppoFaq[] = [
     gruppo: "Riscatti app",
     domande: [
       { domanda: "Cosa sono i riscatti app?", risposta: "Sono premi che si ottengono con un codice dell'app Beyblade X. Ogni mese ci sono premi nuovi: li trovi nella pagina Riscatti app." },
+      { domanda: "Come si ottiene il codice?", risposta: "Scarichi l'app Beyblade X, che si trova solo nell'App Store giapponese. Nell'app accumuli punti, anche scansionando i codici QR che trovi nelle Beyblade Takara Tomy che vendiamo noi. Con i punti partecipi alle estrazioni per vincere Beyblade esclusive. Il codice è fatto da 12 lettere e numeri, tipo AB12-CD34-EF56." },
       { domanda: "Come funziona il riscatto?", risposta: "Scegli il premio, lo metti nel carrello e quando ordini inserisci il codice dell'app: il codice sblocca il premio, che costa € 35. Il sito controlla il codice e poi te lo confermiamo su WhatsApp, prima di spedirti il premio." },
       { domanda: "Posso ordinare un riscatto insieme ad altri prodotti?", risposta: "No. Ogni riscatto è un ordine a sé: un solo premio per volta, senza altri prodotti, preordini o premi." },
     ],
@@ -91,6 +92,7 @@ export const faqEn: GruppoFaq[] = [
     gruppo: "App rewards",
     domande: [
       { domanda: "What are app rewards?", risposta: "They're prizes you get with a code from the Beyblade X app. There are new prizes every month: you'll find them on the App rewards page." },
+      { domanda: "How do I get the code?", risposta: "Download the Beyblade X app, which is only on the Japanese App Store. In the app you collect points, also by scanning the QR codes inside the Takara Tomy Beyblades we sell. With the points you enter draws to win exclusive Beyblades. The code is 12 letters and numbers, like AB12-CD34-EF56." },
       { domanda: "How does redeeming work?", risposta: "Pick the prize, add it to your cart and enter your app code when you order: the code unlocks the prize, which costs €35. The site checks the code and then we confirm it with you on WhatsApp before sending you the prize." },
       { domanda: "Can I order a reward together with other products?", risposta: "No. Each reward is an order of its own: one prize at a time, with no other products, pre-orders or prizes." },
     ],

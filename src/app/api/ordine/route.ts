@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sistemaCodiceApp } from "@/lib/codiceApp";
 import { leggiCatalogo } from "@/lib/sheet";
 import { chiamaScript, scriptPronto } from "@/lib/ordini";
 
@@ -37,6 +38,7 @@ const messaggi = {
     aParte: "Preordini e riscatti vanno in un ordine a parte.",
     data: "Puoi unire solo preordini con la stessa data.",
     codiceApp: "Manca il codice dell'app.",
+    codiceAppFormato: "Il codice dell'app non è valido: sono 12 lettere e numeri, tipo AB12-CD34-EF56.",
     prezzi: "Nel frattempo alcuni prezzi sono cambiati: controlla il totale e premi di nuovo il tasto per confermare.",
     troppi: "Troppi ordini in poco tempo: riprova tra qualche minuto.",
     nonAttivo: "Il salvataggio degli ordini non è ancora attivo.",
@@ -57,6 +59,7 @@ const messaggi = {
     aParte: "Pre-orders and rewards go in a separate order.",
     data: "You can only combine pre-orders with the same release date.",
     codiceApp: "The app code is missing.",
+    codiceAppFormato: "The app code isn't valid: it's 12 letters and numbers, like AB12-CD34-EF56.",
     prezzi: "Some prices have changed in the meantime: check the total and press the button again to confirm.",
     troppi: "Too many orders in a short time: try again in a few minutes.",
     nonAttivo: "Order saving is not active yet.",
@@ -112,6 +115,11 @@ export async function POST(req: Request) {
   if (riscatti.length > 1) return errore(m.unRiscatto);
   if (uscite.size > 1) return errore(m.data);
   if (riscatti.length && !riscatti[0].codice) return errore(m.codiceApp);
+  if (riscatti.length) {
+    const giusto = sistemaCodiceApp(riscatti[0].codice);
+    if (!giusto) return errore(m.codiceAppFormato);
+    riscatti[0].codice = giusto;
+  }
   if (cambiati.length) return errore(m.prezzi, 409, { prezzi: cambiati });
 
   // conto solo gli ordini validi, così chi corregge un errore non viene bloccato

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Prodotto } from "@/data/demo";
 import { useLingua } from "@/i18n/LinguaProvider";
 import { percorso } from "@/i18n/testi";
+import { sistemaCodiceApp } from "@/lib/codiceApp";
 import { copia } from "@/lib/copia";
 import { euro, giorno } from "@/lib/format";
 import { NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
@@ -81,7 +82,7 @@ function messaggio(codice: string, righe: Riga[], d: Dati, inglese: boolean, reg
   const righeProdotti = righe.map(({ p, qta }) => {
     let r = `- ${nomeProdotto(p)} x${qta} = ${euroIt(p.prezzo * qta)}`;
     if (p.stato === "preordine") r += p.uscita ? ` (preordine, esce il ${dataIt(p.uscita)})` : " (preordine)";
-    if (p.stato === "riscatto") r += ` (riscatto app, codice: ${d.codiceApp.trim()})`;
+    if (p.stato === "riscatto") r += ` (riscatto app, codice: ${sistemaCodiceApp(d.codiceApp) ?? d.codiceApp.trim()})`;
     return r;
   });
   const dove =
@@ -189,6 +190,7 @@ export function Ordine() {
       } else serve("paese");
     }
     if (conRiscatto) serve("codiceApp");
+    if (conRiscatto && d.codiceApp.trim() && !sistemaCodiceApp(d.codiceApp)) e.codiceApp = o.errori.codiceApp;
     if (!d.accetto) e.accetto = o.errori.accetto;
     setErrori(e);
     return e;
@@ -219,7 +221,7 @@ export function Ordine() {
         body: JSON.stringify({
           // anche il prezzo che il cliente sta vedendo: se nel frattempo è cambiato, il server lo dice
           righe: righe.map((r) => ({ codice: r.p.codice, qta: r.qta, prezzo: r.p.prezzo })),
-          dati: d,
+          dati: { ...d, codiceApp: sistemaCodiceApp(d.codiceApp) ?? d.codiceApp },
           lingua: lang,
           sito: trappola.current?.value ?? "",
         }),
@@ -448,7 +450,19 @@ export function Ordine() {
         {conRiscatto && (
           <fieldset>
             <legend>{t.stati.riscatto}</legend>
-            {campo("codiceApp", o.codiceApp, { autoComplete: "off", required: true, maxLength: 60 })}
+            {campo("codiceApp", o.codiceApp, {
+              autoComplete: "off",
+              autoCapitalize: "characters",
+              spellCheck: false,
+              required: true,
+              maxLength: 20,
+              placeholder: "XXXX-XXXX-XXXX",
+              // uscendo dal campo lo rimetto nel formato giusto (maiuscole e trattini)
+              onBlur: () => {
+                const giusto = sistemaCodiceApp(d.codiceApp);
+                if (giusto && giusto !== d.codiceApp) imposta("codiceApp", giusto);
+              },
+            })}
             <p className="campo-aiuto">{o.codiceAppAiuto}</p>
           </fieldset>
         )}
