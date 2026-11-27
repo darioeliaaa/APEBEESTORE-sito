@@ -77,6 +77,11 @@ Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: p
 - Controllo anti-robot di Cloudflare (Turnstile): si accende mettendo su Vercel `NEXT_PUBLIC_TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` (dashboard Cloudflare → Turnstile → aggiungi il sito, modalità "Managed"). Di solito il cliente non vede niente; se Cloudflare ha dei dubbi compare una casella. Senza le due chiavi è spento.
 - La pagina `/controllo` si blocca per 15 minuti dopo 10 password sbagliate dallo stesso indirizzo.
 
+## Dominio e Google
+- Il sito è su **www.apebeestore.com** (domini comprati su Aruba, record DNS su Aruba: A `@` e CNAME `www` verso Vercel). `apebeestore.com` rimanda al www.
+- Solo la versione di produzione si fa trovare da Google (`VERCEL_ENV=production`): robots.txt e sitemap.xml sono in `src/app/`, l'indirizzo principale è `SITO` in `src/pagine/meta.ts`. Le versioni di prova di Vercel e il sito in locale restano nascosti.
+- La sitemap prende prodotti e linee dal foglio, quindi si aggiorna da sola.
+
 ## Lingue
 Il sito è in italiano e in inglese. L'italiano sta agli indirizzi di sempre (`/catalogo`), l'inglese sotto `/en` (`/en/catalogo`).
 - Tutti i testi sono in `src/i18n/testi.ts` (le FAQ in `src/i18n/faq.ts`, Chi siamo in `src/pagine/ChiSiamo.tsx`): per cambiare una frase si cambia lì, in tutte e due le lingue.
