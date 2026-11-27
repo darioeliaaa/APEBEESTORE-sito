@@ -99,7 +99,7 @@ export function Footer({ lang }: { lang: Lingua }) {
           <p className="tagline">Bee ready to spin.</p>
         </div>
         <div>
-          <h3>{t.footer.negozio}</h3>
+          <h2>{t.footer.negozio}</h2>
           <ul>
             <li><Link href={p("/catalogo")}>{t.nav.catalogo}</Link></li>
             <li><Link href={p("/preordini")}>{t.nav.preordini}</Link></li>
@@ -107,7 +107,7 @@ export function Footer({ lang }: { lang: Lingua }) {
           </ul>
         </div>
         <div>
-          <h3>{t.footer.info}</h3>
+          <h2>{t.footer.info}</h2>
           <ul>
             <li><Link href={p("/chi-siamo")}>{t.nav.chiSiamo}</Link></li>
             <li><Link href={`${p("/faq")}#come-ordinare`}>{t.nav.comeOrdinare}</Link></li>
@@ -116,7 +116,7 @@ export function Footer({ lang }: { lang: Lingua }) {
           </ul>
         </div>
         <div>
-          <h3>{t.footer.contatti}</h3>
+          <h2>{t.footer.contatti}</h2>
           <ul>
             <li><a href={linkWhatsApp()} target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
             <li><a href="https://www.instagram.com/apebeestore" target="_blank" rel="noopener noreferrer">Instagram</a></li>

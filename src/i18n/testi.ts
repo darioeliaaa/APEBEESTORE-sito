@@ -44,6 +44,7 @@ const it = {
   },
   header: {
     home: "APEBEESTORE, home",
+    salta: "Vai al contenuto",
     menu: "Menu principale",
     info: "Info",
     tema: "Cambia tema chiaro o scuro",
@@ -149,6 +150,7 @@ const it = {
   },
   card: {
     esce: (giorno: string) => `Esce il ${giorno}`,
+    elenco: "Prodotti",
     daConfermare: "Data da confermare",
     aggiungi: "Aggiungi",
     preordina: "Preordina",
@@ -381,6 +383,7 @@ const en: Testi = {
   },
   header: {
     home: "APEBEESTORE, home",
+    salta: "Skip to content",
     menu: "Main menu",
     info: "Info",
     tema: "Switch between light and dark theme",
@@ -494,6 +497,7 @@ const en: Testi = {
   },
   card: {
     esce: (giorno: string) => `Out ${giorno}`,
+    elenco: "Products",
     daConfermare: "Date to be confirmed",
     aggiungi: "Add",
     preordina: "Pre-order",

@@ -3,7 +3,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { Header } from "@/components/Header";
 import { Footer, TastoCommunity } from "@/components/Sections";
 import { LinguaProvider } from "@/i18n/LinguaProvider";
-import type { Lingua } from "@/i18n/testi";
+import { testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, lineeCatalogo } from "@/lib/sheet";
 import "@/app/globals.css";
 
@@ -31,8 +31,14 @@ export async function Struttura({ lang, nonTrovata, children }: { lang: Lingua; 
       <body>
         <LinguaProvider lang={lang}>
           <CartProvider catalogo={perCarrello}>
+            {/* per chi usa la tastiera: il primo Tab porta subito al contenuto, saltando il menu */}
+            <a className="salta" href="#contenuto">
+              {testi[lang].header.salta}
+            </a>
             <Header linee={linee} nonTrovata={nonTrovata} />
-            <main>{children}</main>
+            <main id="contenuto" tabIndex={-1}>
+              {children}
+            </main>
             <Footer lang={lang} />
             <TastoCommunity lang={lang} />
           </CartProvider>

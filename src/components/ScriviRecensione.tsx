@@ -90,7 +90,7 @@ export function ScriviRecensione() {
             <X size={22} strokeWidth={2} aria-hidden="true" />
           </button>
         ) : (
-          <button ref={tastoApri} type="button" className="btn btn--primary" aria-expanded={false} aria-controls="modulo-recensione" onClick={apri}>
+          <button ref={tastoApri} type="button" className="btn btn--primary" aria-expanded={false} onClick={apri}>
             {s.apri}
           </button>
         )}
@@ -108,9 +108,11 @@ export function ScriviRecensione() {
           {/* stelle: sono 5 radio, quindi si scelgono anche con le frecce della tastiera */}
           <fieldset className={`stelle-scelta${errori.voto ? " campo--errore" : ""}`}>
             <legend>{s.voto}</legend>
-            <div className="stelle-riga" onMouseLeave={() => setSopra(0)}>
+            {/* le stelle sotto il mouse si accendono solo se il mouse si muove davvero:
+                se scegli con la tastiera vedi sempre il voto scelto */}
+            <div className="stelle-riga" onMouseLeave={() => setSopra(0)} onKeyDown={() => setSopra(0)}>
               {[1, 2, 3, 4, 5].map((n) => (
-                <label key={n} className={(sopra || d.voto) >= n ? "piena" : undefined} onMouseEnter={() => setSopra(n)}>
+                <label key={n} className={(sopra || d.voto) >= n ? "piena" : undefined} onMouseMove={(e) => (e.movementX || e.movementY) && sopra !== n && setSopra(n)}>
                   <input type="radio" name="voto" value={n} checked={d.voto === n} onChange={() => (imposta("voto", n), setSopra(0))} />
                   <Star size={34} strokeWidth={1.8} aria-hidden="true" />
                   <span className="sr-only">{t.recensioni.stelle(n)}</span>

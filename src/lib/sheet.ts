@@ -82,10 +82,17 @@ async function leggiRighe(foglio: string, fresco = false): Promise<unknown[][] |
   const url =
     `https://sheets.googleapis.com/v4/spreadsheets/${k.id}/values/${encodeURIComponent(foglio)}` +
     "?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=FORMATTED_STRING";
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${await token(k.email, k.chiave)}` },
-    ...(fresco ? { cache: "no-store" as const } : { next: { revalidate: AGGIORNA_OGNI } }),
-  });
+  const leggi = async () =>
+    fetch(url, {
+      headers: { Authorization: `Bearer ${await token(k.email, k.chiave)}` },
+      ...(fresco ? { cache: "no-store" as const } : { next: { revalidate: AGGIORNA_OGNI } }),
+    });
+  let res = await leggi();
+  // 429 = troppe letture in poco tempo (succede durante la build): aspetto un attimo e riprovo una volta
+  if (res.status === 429) {
+    await new Promise((r) => setTimeout(r, 3000));
+    res = await leggi();
+  }
   // Google risponde 400 quando la scheda non c'è
   if (res.status === 400) return null;
   if (!res.ok) throw new Error(`Lettura del foglio ${foglio} non riuscita (${res.status})`);
@@ -294,7 +301,9 @@ export function righeInProdotti(righe: unknown[][], oggi = oggiInItalia()): { pr
     const buone = foto.filter((f) => f.startsWith("https://")).map(linkFoto);
     const nomeSito = nome(nomeGrezzo, codice);
     // in home vanno solo prodotti su ordinazione e preordini: sugli altri la spunta non fa niente
-    const evidenza = c.evidenza >= 0 && attivo(cella(r, c.evidenza));
+    // la spunta, "si", "x" o un numero (1, 2, 3...) valgono tutti come "in home"
+    const ve = cella(r, c.evidenza);
+    const evidenza = c.evidenza >= 0 && (attivo(ve) || Number(testo(ve).replace(",", ".")) > 0);
     if (evidenza && (stato === "soldout" || stato === "riscatto")) {
       avvisa(`«In evidenza» vale solo per prodotti disponibili o in preordine (questo è ${statoScritto})`);
     }

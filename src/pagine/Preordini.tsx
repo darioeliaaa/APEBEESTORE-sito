@@ -17,6 +17,7 @@ export async function Preordini({ lang }: { lang: Lingua }) {
           </div>
           {preordini.length > 0 ? (
             <div className="grid grid--3">
+              <h2 className="sr-only">{testi[lang].card.elenco}</h2>
               {preordini.map((p) => (
                 <ProductCard key={p.codice} p={p} />
               ))}

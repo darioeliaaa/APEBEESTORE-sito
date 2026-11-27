@@ -18,6 +18,7 @@ export async function Riscatti({ lang }: { lang: Lingua }) {
           </div>
           {riscatti.length > 0 ? (
             <div className="grid grid--3">
+              <h2 className="sr-only">{testi[lang].card.elenco}</h2>
               {riscatti.map((p) => (
                 <ProductCard key={p.codice} p={p} />
               ))}

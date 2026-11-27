@@ -243,6 +243,8 @@ export function CatalogoLista({ prodotti }: { prodotti: Prodotto[] }) {
 
       {lista.length > 0 ? (
         <div className="grid">
+          {/* titolo solo per i lettori di schermo, così i titoli delle card non saltano un livello */}
+          <h2 className="sr-only">{t.card.elenco}</h2>
           {lista.map((p) => (
             <ProductCard key={p.codice} p={p} />
           ))}

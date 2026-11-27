@@ -11,7 +11,8 @@ import { leggiBanner, leggiCatalogo, leggiRecensioni, perStato } from "@/lib/she
 
 export async function Home({ lang }: { lang: Lingua }) {
   const t = testi[lang].home;
-  const [catalogo, foto, recensioni] = await Promise.all([leggiCatalogo(), leggiBanner(), leggiRecensioni()]);
+  const [catalogo, foto, recensioni] = await Promise.all([leggiCatalogo(), leggiBanner(), leggiRecensioni().catch(() => [])]);
+  // se la scheda RECENSIONI non si legge, in home sparisce solo la fila delle recensioni
   const ordinabili = perStato(catalogo.prodotti, "ordinazione");
   const scelti = ordinabili.filter((p) => p.evidenza);
   const inEvidenza = scelti.length ? scelti.slice(0, 8) : ordinabili.slice(0, 4);

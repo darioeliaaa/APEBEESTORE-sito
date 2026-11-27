@@ -49,7 +49,7 @@ Serve almeno lo screenshot o la frase. Le recensioni vanno dalla più recente: p
 - Colonne facoltative **Descrizione** e **Descrizione EN**: se ci sono, il testo compare sotto il prezzo.
 
 ## Home
-- **In evidenza**: colonna facoltativa **In evidenza** nel foglio CATALOGO, con la casella di spunta (vanno bene anche "si" o "x"). I prodotti disponibili con la spunta vanno in home, nell'ordine del foglio (massimo 8, meglio 4 o 8 così le file sono piene). Se nessuno ha la spunta vanno i primi 4 disponibili.
+- **In evidenza**: colonna facoltativa **In evidenza** nel foglio CATALOGO, con la casella di spunta (vanno bene anche "si", "x" o un numero). I prodotti disponibili con la spunta vanno in home, nell'ordine del foglio (massimo 8, meglio 4 o 8 così le file sono piene). Se nessuno ha la spunta vanno i primi 4 disponibili.
   - La colonna va in **R** (dopo il cambio e il ricarico in P e Q), non in mezzo: lo script dei prezzi usa le colonne A–N e le celle Q2 e Q3 per posizione.
 - **Preordini aperti**: fino a 4 preordini, prima quelli con la spunta in "In evidenza". Se non ci sono preordini la fila non si vede.
 - **Recensioni**: in fondo le ultime 3 recensioni approvate della scheda RECENSIONI, con il link alla pagina Recensioni. Se non ce ne sono la fila non si vede.
