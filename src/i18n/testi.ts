@@ -29,6 +29,16 @@ const it = {
       "Giocattoli, Beyblade X Takara Tomy e giochi di carte collezionabili, importati dal Giappone. Spedizione e dogana incluse nel prezzo.",
     immagine: "APEBEESTORE, originali dal Giappone. Bee ready to spin.",
     locale: "it_IT",
+    // il testo sotto il titolo nei risultati di Google, pagina per pagina
+    pagine: {
+      catalogo: "Il catalogo APEBEESTORE: Beyblade X Takara Tomy, giocattoli e carte collezionabili originali dal Giappone. Spedizione e dogana incluse nel prezzo.",
+      linea: (nome: string) => `${nome} originali dal Giappone, su ordinazione in 3–4 settimane. Spedizione e dogana incluse nel prezzo, consegna in Italia e in Europa.`,
+      preordini: "Preordina le nuove uscite giapponesi di Beyblade X Takara Tomy prima del lancio: arrivano 3–4 settimane dopo l'uscita in Giappone.",
+      riscatti: "I premi dell'app Beyblade X da riscattare con il codice dell'app: scegli il premio, inserisci il codice e lo ricevi a casa a € 35.",
+      recensioni: "Le recensioni dei clienti APEBEESTORE sui Beyblade X e sui prodotti originali dal Giappone, con i feedback della community WhatsApp.",
+      condizioni: "Le condizioni di vendita di APEBEESTORE: ordini, prezzi, pagamento, spedizioni, recesso entro 14 giorni e garanzia legale.",
+      privacy: "Come APEBEESTORE tratta i tuoi dati: quali raccoglie per ordini e recensioni, perché, per quanto tempo e quali sono i tuoi diritti.",
+    },
   },
   titoli: {
     catalogo: "Catalogo",
@@ -147,6 +157,7 @@ const it = {
     nonCeTitolo: "Questo prodotto non c'è più",
     nonCeTesto: "Forse è stato tolto dal catalogo. Guarda il catalogo o cerca qualcosa di simile con la lente in alto.",
     meta: (nome: string, prezzo: string) => `${nome}, originale dal Giappone. ${prezzo}, spedizione e dogana incluse.`,
+    metaConTesto: (testo: string, prezzo: string) => `${testo} ${prezzo}, spedizione e dogana incluse.`,
   },
   card: {
     esce: (giorno: string) => `Esce il ${giorno}`,
@@ -369,6 +380,15 @@ const en: Testi = {
       "Toys, Takara Tomy Beyblade X and trading card games, imported from Japan. Shipping and customs included in the price.",
     immagine: "APEBEESTORE, originals from Japan. Bee ready to spin.",
     locale: "en_GB",
+    pagine: {
+      catalogo: "The APEBEESTORE catalogue: Takara Tomy Beyblade X, toys and trading card games, original from Japan. Shipping and customs included in the price.",
+      linea: (nome: string) => `Original ${nome} from Japan, made to order in 3–4 weeks. Shipping and customs included in the price, delivery in Italy and Europe.`,
+      preordini: "Pre-order new Japanese Takara Tomy Beyblade X releases before launch: they arrive 3–4 weeks after the release in Japan.",
+      riscatti: "Beyblade X app prizes you can redeem with your app code: pick the prize, enter the code and get it delivered for €35.",
+      recensioni: "APEBEESTORE customer reviews of Beyblade X and other original products from Japan, with feedback from our WhatsApp community.",
+      condizioni: "APEBEESTORE terms of sale: orders, prices, payment, shipping, 14-day right of withdrawal and legal guarantee.",
+      privacy: "How APEBEESTORE handles your data: what we collect for orders and reviews, why, for how long and what your rights are.",
+    },
   },
   titoli: {
     catalogo: "Catalogue",
@@ -495,6 +515,7 @@ const en: Testi = {
     nonCeTitolo: "This product is no longer here",
     nonCeTesto: "It may have been removed from the catalogue. Browse the catalogue or search for something similar with the magnifying glass at the top.",
     meta: (nome: string, prezzo: string) => `${nome}, original from Japan. ${prezzo}, shipping and customs included.`,
+    metaConTesto: (testo: string, prezzo: string) => `${testo} ${prezzo}, shipping and customs included.`,
   },
   card: {
     esce: (giorno: string) => `Out ${giorno}`,

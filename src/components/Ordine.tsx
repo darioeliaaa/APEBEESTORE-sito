@@ -235,8 +235,9 @@ export function Ordine() {
       if (res.ok) {
         numero = r.numero;
         totaleScript = r.totale;
-      } else if (res.status !== 503) {
+      } else if (res.status !== 503 && res.status !== 403) {
         // l'ordine non va bene: lo dico e non vado avanti
+        // (503 = salvataggio non attivo, 403 = controllo anti-robot non riuscito: in quei casi si va comunque su WhatsApp)
         if (Array.isArray(r.prezzi)) {
           // prezzi cambiati: aggiorno il carrello, segno i vecchi prezzi e il cliente conferma di nuovo
           aggiornaPrezzi(r.prezzi);

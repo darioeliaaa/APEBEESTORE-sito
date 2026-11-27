@@ -12,8 +12,14 @@ const cittaRitiro = ["Milano", "Como", "Varese"];
 
 // un limite semplice contro chi manda ordini a raffica: 5 ordini ogni 10 minuti dallo stesso indirizzo
 const invii = new Map<string, number[]>();
+// ogni tanto tolgo gli indirizzi e le email che non scrivono da più di un'ora, così la memoria non cresce
+function pulisci(m: Map<string, number[]>, ora: number) {
+  if (m.size < 500) return;
+  for (const [k, v] of m) if (!v.length || ora - v[v.length - 1] > 60 * 60 * 1000) m.delete(k);
+}
 function troppi(ip: string) {
   const ora = Date.now();
+  pulisci(invii, ora);
   const recenti = (invii.get(ip) ?? []).filter((t) => ora - t < 10 * 60 * 1000);
   recenti.push(ora);
   invii.set(ip, recenti);
@@ -25,6 +31,7 @@ function troppi(ip: string) {
 const perEmail = new Map<string, number[]>();
 function troppiPerEmail(email: string) {
   const ora = Date.now();
+  pulisci(perEmail, ora);
   const recenti = (perEmail.get(email) ?? []).filter((t) => ora - t < 60 * 60 * 1000);
   recenti.push(ora);
   perEmail.set(email, recenti);

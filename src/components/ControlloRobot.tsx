@@ -52,7 +52,9 @@ export function ControlloRobot({ lang, ref }: { lang: Lingua; ref: Ref<Robot> })
   useImperativeHandle(ref, () => ({
     aspetta: async () => {
       if (!CHIAVE_ROBOT) return "";
-      for (let i = 0; i < 40 && !codice.current; i++) await new Promise((r) => setTimeout(r, 250));
+      // 10 secondi; se Cloudflare mostra la casella da spuntare, si aspetta fino a 45 secondi
+      const visibile = () => (box.current?.offsetHeight ?? 0) > 0;
+      for (let i = 0; !codice.current && (i < 40 || (visibile() && i < 180)); i++) await new Promise((r) => setTimeout(r, 250));
       return codice.current;
     },
     reset: () => {

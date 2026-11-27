@@ -4,6 +4,14 @@ import { RecensioneCard } from "@/components/RecensioneCard";
 import { Community, Hero } from "@/components/Sections";
 import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { leggiBanner, leggiCatalogo, leggiRecensioni, perStato } from "@/lib/sheet";
+import { ORGANIZZAZIONE, SITO } from "./meta";
+import { perCard } from "@/lib/prodotto";
+
+// per Google: il nome del sito e chi lo gestisce
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [{ "@type": "WebSite", name: "APEBEESTORE", url: SITO, inLanguage: ["it", "en"] }, ORGANIZZAZIONE],
+};
 
 // Home: banner, prodotti in evidenza, preordini aperti, ultime recensioni, community.
 // In evidenza vanno i prodotti con la spunta nella colonna "In evidenza" del foglio, nell'ordine del foglio.
@@ -25,6 +33,7 @@ export async function Home({ lang }: { lang: Lingua }) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <Hero lang={lang} foto={foto} />
 
       {inEvidenza.length > 0 && (
@@ -41,7 +50,7 @@ export async function Home({ lang }: { lang: Lingua }) {
             </div>
             <div className="grid">
               {inEvidenza.map((p) => (
-                <ProductCard key={p.codice} p={p} />
+                <ProductCard key={p.codice} p={perCard(p)} />
               ))}
             </div>
           </div>
@@ -62,7 +71,7 @@ export async function Home({ lang }: { lang: Lingua }) {
             </div>
             <div className="grid">
               {preordini.map((p) => (
-                <ProductCard key={p.codice} p={p} />
+                <ProductCard key={p.codice} p={perCard(p)} />
               ))}
             </div>
           </div>

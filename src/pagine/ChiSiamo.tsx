@@ -1,15 +1,10 @@
 import { AtSign, Mail, MessageCircle } from "lucide-react";
 import { Community, PageHead } from "@/components/Sections";
 import type { Lingua } from "@/i18n/testi";
+import { ORGANIZZAZIONE } from "@/pagine/meta";
 import { EMAIL, NUMERO_LEGGIBILE, linkWhatsApp } from "@/lib/whatsapp";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "APEBEESTORE",
-  address: { "@type": "PostalAddress", addressLocality: "Milano", addressCountry: "IT" },
-  sameAs: ["https://www.instagram.com/apebeestore"],
-};
+const jsonLd = { "@context": "https://schema.org", ...ORGANIZZAZIONE };
 
 const testa = {
   it: { titolo: "Chi siamo", testo: "Giocattoli, Beyblade X Takara Tomy e giochi di carte collezionabili, dal Giappone in Italia." },

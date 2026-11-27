@@ -3,7 +3,7 @@ import { metaPagina } from "@/pagine/meta";
 import { testi } from "@/i18n/testi";
 
 export const revalidate = 300;
-export const metadata = metaPagina("en", "/preordini", testi.en.titoli.preordini);
+export const metadata = metaPagina("en", "/preordini", testi.en.titoli.preordini, testi.en.meta.pagine.preordini);
 
 export default function Pagina() {
   return <Preordini lang="en" />;

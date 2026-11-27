@@ -11,16 +11,12 @@ const fisse = ["/", "/catalogo", "/preordini", "/riscatti", "/recensioni", "/faq
 
 const voce = (link: (l: Lingua) => string): MetadataRoute.Sitemap[number] => ({
   url: SITO + link("it"),
-  alternates: { languages: { it: SITO + link("it"), en: SITO + link("en") } },
+  alternates: { languages: { it: SITO + link("it"), en: SITO + link("en"), "x-default": SITO + link("it") } },
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let prodotti: Awaited<ReturnType<typeof leggiCatalogo>>["prodotti"] = [];
-  try {
-    prodotti = (await leggiCatalogo()).prodotti;
-  } catch {
-    // se il foglio non risponde la sitemap esce lo stesso, con le pagine fisse
-  }
+  // se il foglio non risponde l'errore sale e resta la sitemap di prima (come per le altre pagine)
+  const { prodotti } = await leggiCatalogo();
   return [
     ...fisse.map((p) => voce((l) => percorso(l, p))),
     ...lineeCatalogo(prodotti).map((x) => voce((l) => percorso(l, `/catalogo/${x.slug}`))),

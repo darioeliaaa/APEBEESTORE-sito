@@ -5,6 +5,7 @@ import { PageHead } from "@/components/Sections";
 import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, lineeCatalogo, perStato, slugLinea } from "@/lib/sheet";
 import { metaPagina } from "./meta";
+import { perCard } from "@/lib/prodotto";
 
 // /catalogo: si sceglie la linea (Beyblade X, Pokémon...). Ogni linea ha la sua pagina /catalogo/<linea>
 export async function Catalogo({ lang }: { lang: Lingua }) {
@@ -63,7 +64,7 @@ export async function CatalogoLinea({ lang, slug }: { lang: Lingua; slug: string
       </section>
       <section className="block block--top">
         <div className="wrap">
-          <CatalogoLista prodotti={prodotti} />
+          <CatalogoLista prodotti={prodotti.map(perCard)} />
         </div>
       </section>
     </>
@@ -82,6 +83,6 @@ export async function nomeDellaLinea(slug: string) {
 // titolo e link per Google della pagina di una linea; se la linea non c'è più vale come /catalogo
 export async function metaLinea(lang: Lingua, slug: string): Promise<Metadata> {
   const nome = await nomeDellaLinea(slug);
-  if (nome) return metaPagina(lang, `/catalogo/${slug}`, nome);
+  if (nome) return metaPagina(lang, `/catalogo/${slug}`, nome, testi[lang].meta.pagine.linea(nome));
   return { ...metaPagina(lang, "/catalogo", testi[lang].titoli.catalogo), robots: { index: false, follow: true } };
 }

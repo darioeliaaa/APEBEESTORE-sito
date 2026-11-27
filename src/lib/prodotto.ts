@@ -1,3 +1,4 @@
+import type { Prodotto } from "@/data/demo";
 import { percorso, type Lingua } from "@/i18n/testi";
 
 // indirizzo della pagina di un prodotto: "BX-46" -> /prodotto/bx-46
@@ -16,3 +17,7 @@ export const classiStato = {
   riscatto: "badge--redeem",
   soldout: "badge--sold",
 };
+
+// alle card e alle liste del catalogo servono solo i dati della card: descrizioni e foto in più restano sul server
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const perCard = ({ descrizione, foto, ...p }: Prodotto): Prodotto => p;

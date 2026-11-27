@@ -2,6 +2,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { PageHead } from "@/components/Sections";
 import { testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, perStato } from "@/lib/sheet";
+import { perCard } from "@/lib/prodotto";
 
 export async function Preordini({ lang }: { lang: Lingua }) {
   const t = testi[lang].preordini;
@@ -19,7 +20,7 @@ export async function Preordini({ lang }: { lang: Lingua }) {
             <div className="grid grid--3">
               <h2 className="sr-only">{testi[lang].card.elenco}</h2>
               {preordini.map((p) => (
-                <ProductCard key={p.codice} p={p} />
+                <ProductCard key={p.codice} p={perCard(p)} />
               ))}
             </div>
           ) : (

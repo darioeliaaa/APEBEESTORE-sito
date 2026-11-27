@@ -34,6 +34,8 @@ const messaggi = {
 const invii = new Map<string, number[]>();
 function troppe(ip: string) {
   const ora = Date.now();
+  // ogni tanto tolgo gli indirizzi che non scrivono da più di un'ora, così la memoria non cresce
+  if (invii.size >= 500) for (const [k, v] of invii) if (ora - v[v.length - 1] > 60 * 60 * 1000) invii.delete(k);
   const recenti = (invii.get(ip) ?? []).filter((t) => ora - t < 60 * 60 * 1000);
   recenti.push(ora);
   invii.set(ip, recenti);

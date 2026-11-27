@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Acquisto } from "@/components/Acquisto";
 import { Galleria } from "@/components/Galleria";
 import { ProductCard } from "@/components/ProductCard";
 import type { Prodotto } from "@/data/demo";
 import { nomeCategoria, percorso, testi, type Lingua } from "@/i18n/testi";
 import { euro, giorno } from "@/lib/format";
-import { classiStato, slugCodice } from "@/lib/prodotto";
+import { classiStato, linkProdotto, perCard, slugCodice } from "@/lib/prodotto";
 import { leggiCatalogo, slugLinea } from "@/lib/sheet";
-import { metaPagina } from "./meta";
+import { SITO, metaPagina } from "./meta";
 
 // /prodotto/<codice>: la scheda di un prodotto (catalogo, preordini e premi dei riscatti)
 
@@ -24,6 +25,16 @@ const titolo = (p: Prodotto) => (p.nome === p.codice ? p.codice : `${p.codice} $
 
 // per Google e per l'anteprima dei link: "Beyblade X BX-46 Stadium Infinity – Takara Tomy"
 const nomeCompleto = (p: Prodotto) => (beyblade(p) ? `Beyblade X ${titolo(p)} – Takara Tomy` : `${p.linea} ${titolo(p)}`);
+
+// la descrizione nella lingua giusta (se manca, quella dell'altra lingua)
+const descrizioneIn = (lang: Lingua, p: Prodotto) => (lang === "en" ? p.descrizione?.en ?? p.descrizione?.it : p.descrizione?.it ?? p.descrizione?.en);
+
+// testo per Google: la prima frase della descrizione, tagliata a parola intera
+function corto(testo: string, max: number) {
+  if (testo.length <= max) return testo;
+  const spazio = testo.lastIndexOf(" ", max);
+  return testo.slice(0, spazio > 0 ? spazio : max).replace(/[,;:.]$/, "") + "…";
+}
 
 // prima quelli della stessa categoria, poi il resto della linea; i sold out mai
 function correlati(prodotti: Prodotto[], p: Prodotto) {
@@ -49,7 +60,8 @@ export async function metaProdotto(lang: Lingua, slug: string): Promise<Metadata
   const { p } = await trova(slug);
   if (!p) return { title: t.nonCeTitolo, robots: { index: false, follow: false } };
   const nome = nomeCompleto(p);
-  const descrizione = t.meta(nome, euro(p.prezzo, lang));
+  const primaRiga = descrizioneIn(lang, p)?.split(/\n/)[0].trim();
+  const descrizione = primaRiga ? t.metaConTesto(corto(primaRiga, 115), euro(p.prezzo, lang)) : t.meta(nome, euro(p.prezzo, lang));
   const immagini = p.immagine ? [{ url: p.immagine, alt: nome }] : undefined;
   return {
     ...metaPagina(lang, `/prodotto/${slug}`, nome, descrizione),
@@ -66,7 +78,8 @@ export async function metaProdotto(lang: Lingua, slug: string): Promise<Metadata
 export async function ProdottoPagina({ lang, slug }: { lang: Lingua; slug: string }) {
   const t = testi[lang];
   const { prodotti, p } = await trova(slug);
-  if (!p) return <NonCe lang={lang} />;
+  // prodotto tolto dal foglio (o link sbagliato): pagina "non c'è più" con risposta 404, così Google la toglie
+  if (!p) notFound();
 
   const pre = p.stato === "preordine";
   const ris = p.stato === "riscatto";
@@ -74,7 +87,7 @@ export async function ProdottoPagina({ lang, slug }: { lang: Lingua; slug: strin
   const torna = indietro(lang, p);
   const altri = correlati(prodotti, p);
   const foto = p.foto ?? (p.immagine ? [p.immagine] : []);
-  const descrizione = lang === "en" ? p.descrizione?.en ?? p.descrizione?.it : p.descrizione?.it ?? p.descrizione?.en;
+  const descrizione = descrizioneIn(lang, p);
 
   // dati per Google: nome, foto, prezzo e disponibilità
   const disponibilita = { ordinazione: "BackOrder", preordine: "PreOrder", riscatto: "InStock", soldout: "SoldOut" }[p.stato];
@@ -87,7 +100,36 @@ export async function ProdottoPagina({ lang, slug }: { lang: Lingua; slug: strin
     ...(beyblade(p) ? { brand: { "@type": "Brand", name: "Takara Tomy" } } : {}),
     category: nomeCategoria(lang, p.categoria),
     ...(descrizione ? { description: descrizione } : {}),
-    offers: { "@type": "Offer", price: p.prezzo.toFixed(2), priceCurrency: "EUR", availability: `https://schema.org/${disponibilita}` },
+    url: SITO + linkProdotto(lang, p.codice),
+    offers: {
+      "@type": "Offer",
+      url: SITO + linkProdotto(lang, p.codice),
+      price: p.prezzo.toFixed(2),
+      priceCurrency: "EUR",
+      availability: `https://schema.org/${disponibilita}`,
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: "APEBEESTORE", url: SITO },
+      // spedizione in Italia € 8, arriva in circa 3–4 settimane (il prodotto parte dal Giappone)
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: { "@type": "MonetaryAmount", value: "8.00", currency: "EUR" },
+        shippingDestination: { "@type": "DefinedRegion", addressCountry: "IT" },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 2, unitCode: "DAY" },
+          transitTime: { "@type": "QuantitativeValue", minValue: 21, maxValue: 28, unitCode: "DAY" },
+        },
+      },
+      // recesso entro 14 giorni, spedizione del reso a carico del cliente (come nelle condizioni di vendita)
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "IT",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 14,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
+      },
+    },
   };
 
   return (
@@ -156,7 +198,7 @@ export async function ProdottoPagina({ lang, slug }: { lang: Lingua; slug: strin
             </div>
             <div className="grid">
               {altri.map((x) => (
-                <ProductCard key={x.codice} p={x} />
+                <ProductCard key={x.codice} p={perCard(x)} />
               ))}
             </div>
           </div>
@@ -167,7 +209,7 @@ export async function ProdottoPagina({ lang, slug }: { lang: Lingua; slug: strin
 }
 
 // link vecchio o prodotto tolto dal foglio: niente errore tecnico, una pagina normale
-function NonCe({ lang }: { lang: Lingua }) {
+export function NonCe({ lang }: { lang: Lingua }) {
   const t = testi[lang];
   return (
     <section className="page-head">

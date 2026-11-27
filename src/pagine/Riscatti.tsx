@@ -3,6 +3,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { PageHead } from "@/components/Sections";
 import { percorso, testi, type Lingua } from "@/i18n/testi";
 import { leggiCatalogo, perStato } from "@/lib/sheet";
+import { perCard } from "@/lib/prodotto";
 
 export async function Riscatti({ lang }: { lang: Lingua }) {
   const t = testi[lang].riscatti;
@@ -20,7 +21,7 @@ export async function Riscatti({ lang }: { lang: Lingua }) {
             <div className="grid grid--3">
               <h2 className="sr-only">{testi[lang].card.elenco}</h2>
               {riscatti.map((p) => (
-                <ProductCard key={p.codice} p={p} />
+                <ProductCard key={p.codice} p={perCard(p)} />
               ))}
             </div>
           ) : (
