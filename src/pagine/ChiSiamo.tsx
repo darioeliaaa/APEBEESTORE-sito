@@ -12,8 +12,8 @@ const jsonLd = {
 };
 
 const testa = {
-  it: { titolo: "Chi siamo", testo: "Beyblade X originali Takara Tomy dal Giappone, da Milano." },
-  en: { titolo: "About us", testo: "Original Takara Tomy Beyblade X from Japan, from Milan." },
+  it: { titolo: "Chi siamo", testo: "Giocattoli, Beyblade X Takara Tomy e giochi di carte collezionabili, dal Giappone in Italia." },
+  en: { titolo: "About us", testo: "Toys, Takara Tomy Beyblade X and trading card games, from Japan to Italy." },
 };
 
 export function ChiSiamo({ lang }: { lang: Lingua }) {
@@ -33,10 +33,10 @@ function TestoIt() {
     <section className="block block--top">
       <div className="wrap narrow text">
         <p>
-          APEBEESTORE è un negozio online con base a Milano specializzato in Beyblade X originali Takara Tomy, importati
-          direttamente dal Giappone. Vendiamo trottole, lanciatori, stadi e accessori della linea Beyblade X nella versione
-          giapponese, quella usata nei tornei ufficiali in Giappone e in tutto il mondo, e diversa dalla linea Hasbro
-          distribuita in Europa.
+          APEBEESTORE è un negozio online con base a Milano / Como specializzato in giocattoli, Beyblade X Takara Tomy e
+          giochi di carte collezionabili, importati direttamente dal Giappone. Siamo specializzati nella vendita di
+          Beyblade, lanciatori, stadi e accessori della linea Beyblade X nella versione giapponese, quella usata nei tornei
+          ufficiali in tutto il mondo.
         </p>
 
         <div className="stats">
@@ -50,7 +50,7 @@ function TestoIt() {
           </div>
           <div>
             <strong>100%</strong>
-            <span className="label">Originali Takara Tomy</span>
+            <span className="label">Prodotti originali</span>
           </div>
         </div>
 
@@ -63,17 +63,19 @@ function TestoIt() {
 
         <h2>Cosa trovi</h2>
         <ul>
-          <li>Trottole Beyblade X Takara Tomy delle serie BX, UX e CX</li>
+          <li>Beyblade X Takara Tomy delle serie BX, UX e CX</li>
           <li>Lanciatori, grip e accessori originali</li>
           <li>Stadi Beyblade X, come lo Xtreme Stadium</li>
+          <li>Giocattoli</li>
+          <li>Giochi di carte collezionabili</li>
           <li>Preordini delle nuove uscite giapponesi</li>
         </ul>
 
         <h2>Come lavoriamo</h2>
         <p>
-          Ogni prodotto viene acquistato in Giappone e spedito in Italia da noi. Per il momento non teniamo un magazzino di
-          pronta consegna: ordini quello che vuoi e lo facciamo arrivare apposta, in circa 3–4 settimane. Per le novità
-          apriamo i preordini prima dell&apos;uscita, così ti assicuri il pezzo della prima ondata.
+          Ogni prodotto viene acquistato in Giappone e spedito in Italia da noi. Ordini quello che vuoi e lo facciamo
+          arrivare apposta, in circa 3–4 settimane. Per le novità apriamo i preordini prima dell&apos;uscita, così ti
+          assicuri il pezzo della prima ondata.
         </p>
         <p>
           Il prezzo che vedi sul sito è quello finale: spedizione dal Giappone e dogana sono già comprese, e non ti arriva
@@ -90,7 +92,7 @@ function TestoIt() {
 
         <h2>Perché fidarsi</h2>
         <p>
-          Vendiamo solo prodotti originali Takara Tomy, mai copie o versioni non ufficiali. Su Instagram pubblichiamo le
+          Vendiamo solo prodotti originali, mai copie o versioni non ufficiali. Su Instagram pubblichiamo le
           foto dei prodotti arrivati e i feedback di chi ha già comprato da noi. Ci trovi anche di persona in alcune fiere
           del fumetto e del collezionismo, con i prodotti sul banco.
         </p>
@@ -111,10 +113,9 @@ function TestoEn() {
     <section className="block block--top">
       <div className="wrap narrow text">
         <p>
-          APEBEESTORE is an online shop based in Milan that specialises in original Takara Tomy Beyblade X, imported
-          directly from Japan. We sell tops, launchers, stadiums and accessories from the Beyblade X line in their Japanese
-          version, the one used in official tournaments in Japan and around the world, which is different from the Hasbro
-          line sold in Europe.
+          APEBEESTORE is an online shop based in Milan / Como that specialises in toys, Takara Tomy Beyblade X and trading
+          card games, imported directly from Japan. We specialise in Beyblade, launchers, stadiums and accessories from the
+          Beyblade X line in their Japanese version, the one used in official tournaments around the world.
         </p>
 
         <div className="stats">
@@ -128,7 +129,7 @@ function TestoEn() {
           </div>
           <div>
             <strong>100%</strong>
-            <span className="label">Original Takara Tomy</span>
+            <span className="label">Original products</span>
           </div>
         </div>
 
@@ -141,16 +142,18 @@ function TestoEn() {
 
         <h2>What you&apos;ll find</h2>
         <ul>
-          <li>Takara Tomy Beyblade X tops from the BX, UX and CX series</li>
+          <li>Takara Tomy Beyblade X from the BX, UX and CX series</li>
           <li>Original launchers, grips and accessories</li>
           <li>Beyblade X stadiums, like the Xtreme Stadium</li>
+          <li>Toys</li>
+          <li>Trading card games</li>
           <li>Pre-orders for new Japanese releases</li>
         </ul>
 
         <h2>How we work</h2>
         <p>
-          Every product is bought in Japan and shipped to Italy by us. For now we don&apos;t keep stock ready to ship: you
-          order what you want and we bring it in just for you, in about 3–4 weeks. For new releases we open pre-orders
+          Every product is bought in Japan and shipped to Italy by us. You order what you want and we bring it in just for
+          you, in about 3–4 weeks. For new releases we open pre-orders
           before launch, so you can secure a piece from the first batch.
         </p>
         <p>
@@ -168,7 +171,7 @@ function TestoEn() {
 
         <h2>Why trust us</h2>
         <p>
-          We only sell original Takara Tomy products, never copies or unofficial versions. On Instagram we post photos of
+          We only sell original products, never copies or unofficial versions. On Instagram we post photos of
           the products we receive and feedback from people who have already bought from us. You can also meet us in person
           at some comic and collectibles fairs, with our products on the stand.
         </p>

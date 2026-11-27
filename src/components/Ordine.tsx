@@ -266,6 +266,10 @@ export function Ordine() {
     svuota();
     setInvio(false);
     window.scrollTo({ top: 0 });
+    // WhatsApp si apre da solo con il messaggio già scritto: al cliente resta solo da premere invia.
+    // Si apre in questa scheda perché i browser bloccano le schede nuove aperte dopo un'attesa;
+    // tornando indietro si ritrova la conferma (salvata qui sopra) con il tasto di riserva.
+    window.location.assign(pronto.link);
   }
 
   // la testata della pagina cambia con l'ordine inviato: "Compila i tuoi dati" non serve più

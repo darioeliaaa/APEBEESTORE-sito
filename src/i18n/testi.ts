@@ -26,7 +26,7 @@ const it = {
   meta: {
     titolo: "APEBEESTORE · Originali dal Giappone",
     descrizione:
-      "Giochi e collezionabili originali importati dal Giappone, a partire dai Beyblade X Takara Tomy. Spedizione e dogana incluse nel prezzo.",
+      "Giocattoli, Beyblade X Takara Tomy e giochi di carte collezionabili, importati dal Giappone. Spedizione e dogana incluse nel prezzo.",
     immagine: "APEBEESTORE, originali dal Giappone. Bee ready to spin.",
     locale: "it_IT",
   },
@@ -77,8 +77,8 @@ const it = {
     comeOrdinare: "Come ordinare",
   },
   hero: {
-    label: "Originali dal Giappone",
-    lead: "Giochi e collezionabili originali, importati dal Giappone. Spedizione e dogana incluse nel prezzo.",
+    label: "Prodotti originali dal Giappone",
+    lead: "Giocattoli, Beyblade X Takara Tomy e giochi di carte collezionabili, importati dal Giappone. Spedizione e dogana incluse nel prezzo.",
     catalogo: "Vai al catalogo",
     preordini: "Preordini",
     tag: "Dal Giappone in",
@@ -98,7 +98,7 @@ const it = {
   community: {
     label: "Community WhatsApp",
     titolo: "Entra nella community",
-    testo: "Più di 200 appassionati. Nuove uscite, preordini e tornei li annunciamo prima lì.",
+    testo: "Più di 200 appassionati. Nuove uscite e preordini li annunciamo prima lì.",
     entra: "Entra",
     fisso: "Entra nella community WhatsApp",
   },
@@ -110,7 +110,7 @@ const it = {
   },
   passi: [
     { titolo: "Scegli", testo: "Metti nel carrello quello che vuoi." },
-    { titolo: "Ordina", testo: "Inserisci i tuoi dati. L'ordine arriva su WhatsApp." },
+    { titolo: "Ordina", testo: "Inserisci i tuoi dati. L'ordine verrà inviato automaticamente su WhatsApp." },
     { titolo: "Paga", testo: "Su WhatsApp con PayPal, Revolut o bonifico." },
     { titolo: "Ricevi", testo: "In 3–4 settimane a casa, o a mano a Milano, Como e Varese." },
   ],
@@ -161,8 +161,8 @@ const it = {
   catalogo: {
     label: "Su ordinazione · 3–4 settimane",
     titolo: "Catalogo",
-    testo: "Spedizione e dogana incluse in tutti i prezzi.",
-    scegli: "Scegli il mondo che ti interessa. Spedizione e dogana incluse in tutti i prezzi.",
+    testo: "Spedizione e dogana incluse nel prezzo.",
+    scegli: "Scegli il mondo che ti interessa. Spedizione e dogana incluse nel prezzo.",
     tutteLeLinee: "Tutte le linee",
   },
   filtri: {
@@ -227,17 +227,17 @@ const it = {
     label: "Nuove uscite",
     titolo: "Preordini",
     testo: "Prenota le nuove uscite dal Giappone.",
-    avvisoTitolo: "Si ordinano da soli.",
-    avviso: "Insieme puoi mettere solo preordini con la stessa data di uscita.",
+    avvisoTitolo: "Attenzione:",
+    avviso: "I prodotti in preordine non possono essere acquistati insieme ai prodotti disponibili. Puoi combinare nello stesso ordine solo preordini con la stessa data di uscita.",
     vuoto: "Al momento non ci sono preordini aperti. Li annunciamo prima nella community.",
   },
   riscatti: {
-    label: "Cambiano ogni mese",
+    label: "Selezione periodicamente aggiornata",
     titolo: "Riscatti app",
     testo: "I premi da riscattare con il codice dell'app Beyblade X.",
-    avvisoTitolo: "Si ordinano da soli.",
-    avviso: "Un premio per ordine: non si unisce ad altri prodotti, preordini o premi.",
-    vuoto: "I premi di questo mese arrivano a breve.",
+    avvisoTitolo: "Attenzione:",
+    avviso: "Ogni premio deve essere ordinato singolarmente e non può essere combinato con altri prodotti, preordini o premi.",
+    vuoto: "I nuovi premi arrivano a breve.",
     comeTitolo: "Come funziona il riscatto",
     come: "Scegli il premio e inseriscilo con il codice dell'app quando ordini: il codice lo sblocca a € 35 e ti arriva a casa.",
   },
@@ -323,7 +323,7 @@ const it = {
     accetto: ["Ho letto le ", "condizioni di vendita", " e la ", "privacy", ""],
     invia: "Ordine con obbligo di pagamento",
     invio: "Invio in corso…",
-    aiutoInvio: "Premendo il tasto, l'ordine viene registrato e ti arriva un'email di riepilogo. Poi ce lo mandi su WhatsApp e lì ci accordiamo sul pagamento.",
+    aiutoInvio: "Premendo il tasto, l'ordine viene registrato, ti arriva un'email di riepilogo e si apre WhatsApp con il messaggio già scritto: premi invia e lì ci accordiamo sul pagamento.",
     erroreGenerico: "Non siamo riusciti a confermare l'ordine. Riprova tra poco.",
     errori: {
       obbligatorio: "Campo obbligatorio",
@@ -336,11 +336,11 @@ const it = {
     },
     pronto: "Ordine confermato",
     prontoTesto: (codice: string) =>
-      `Il tuo ordine ${codice} è registrato e ti abbiamo mandato un'email di riepilogo. Ultimo passo: mandacelo su WhatsApp, lì ci accordiamo sul pagamento.`,
+      `Il tuo ordine ${codice} è registrato e ti abbiamo mandato un'email di riepilogo. Se WhatsApp non si è aperto da solo, premi il tasto qui sotto e invia il messaggio: lì ci accordiamo sul pagamento.`,
     prontoSenzaFoglio: "Ultimo passo",
     prontoTestoSenzaFoglio: (codice: string) =>
-      `Manda l'ordine ${codice} su WhatsApp con il messaggio già scritto: lì ci accordiamo sul pagamento.`,
-    apriWhatsApp: "Invia su WhatsApp",
+      `Se WhatsApp non si è aperto da solo, premi il tasto qui sotto e invia il messaggio dell'ordine ${codice}: lì ci accordiamo sul pagamento.`,
+    apriWhatsApp: "Apri WhatsApp",
     continua: "Continua a guardare",
     copia: "Copia messaggio",
     copiato: "Messaggio copiato",
@@ -366,7 +366,7 @@ const en: Testi = {
   meta: {
     titolo: "APEBEESTORE · Originals from Japan",
     descrizione:
-      "Original toys and collectibles imported from Japan, starting with Takara Tomy Beyblade X. Shipping and customs included in the price.",
+      "Toys, Takara Tomy Beyblade X and trading card games, imported from Japan. Shipping and customs included in the price.",
     immagine: "APEBEESTORE, originals from Japan. Bee ready to spin.",
     locale: "en_GB",
   },
@@ -417,8 +417,8 @@ const en: Testi = {
     comeOrdinare: "How to order",
   },
   hero: {
-    label: "Originals from Japan",
-    lead: "Original toys and collectibles, imported from Japan. Shipping and customs included in the price.",
+    label: "Original products from Japan",
+    lead: "Toys, Takara Tomy Beyblade X and trading card games, imported from Japan. Shipping and customs included in the price.",
     catalogo: "Shop the catalogue",
     preordini: "Pre-orders",
     tag: "From Japan in",
@@ -438,7 +438,7 @@ const en: Testi = {
   community: {
     label: "WhatsApp community",
     titolo: "Join the community",
-    testo: "More than 200 fans. We announce new releases, pre-orders and tournaments there first.",
+    testo: "More than 200 fans. We announce new releases and pre-orders there first.",
     entra: "Join",
     fisso: "Join our WhatsApp community",
   },
@@ -450,7 +450,7 @@ const en: Testi = {
   },
   passi: [
     { titolo: "Choose", testo: "Add what you want to your cart." },
-    { titolo: "Order", testo: "Enter your details. Your order reaches us on WhatsApp." },
+    { titolo: "Order", testo: "Enter your details. Your order will be sent automatically on WhatsApp." },
     { titolo: "Pay", testo: "On WhatsApp with PayPal, Revolut or bank transfer." },
     { titolo: "Receive", testo: "At home in 3–4 weeks, or by hand in Milan, Como and Varese." },
   ],
@@ -509,8 +509,8 @@ const en: Testi = {
   catalogo: {
     label: "Special order · 3–4 weeks",
     titolo: "Catalogue",
-    testo: "Shipping and customs included in every price.",
-    scegli: "Choose the world you're into. Shipping and customs included in every price.",
+    testo: "Shipping and customs included in the price.",
+    scegli: "Choose the world you're into. Shipping and customs included in the price.",
     tutteLeLinee: "All lines",
   },
   filtri: {
@@ -575,17 +575,17 @@ const en: Testi = {
     label: "New releases",
     titolo: "Pre-orders",
     testo: "Reserve the new releases from Japan.",
-    avvisoTitolo: "Ordered on their own.",
-    avviso: "You can only combine pre-orders with the same release date.",
+    avvisoTitolo: "Please note:",
+    avviso: "Pre-order products can't be bought together with available products. You can only combine pre-orders with the same release date in one order.",
     vuoto: "There are no open pre-orders right now. We announce them first in the community.",
   },
   riscatti: {
-    label: "New every month",
+    label: "Selection updated regularly",
     titolo: "App rewards",
     testo: "Prizes you can redeem with a code from the Beyblade X app.",
-    avvisoTitolo: "Ordered on their own.",
-    avviso: "One prize per order: it can't be combined with other products, pre-orders or prizes.",
-    vuoto: "This month's prizes are coming soon.",
+    avvisoTitolo: "Please note:",
+    avviso: "Each prize must be ordered on its own and can't be combined with other products, pre-orders or prizes.",
+    vuoto: "New prizes are coming soon.",
     comeTitolo: "How redeeming works",
     come: "Pick the prize and enter your app code when you order: the code unlocks it for €35 and it arrives at your home.",
   },
@@ -671,7 +671,7 @@ const en: Testi = {
     accetto: ["I have read the ", "terms of sale", " and the ", "privacy policy", ""],
     invia: "Order with obligation to pay",
     invio: "Sending…",
-    aiutoInvio: "When you press the button, your order is registered and you get a summary email. Then you send it to us on WhatsApp and we arrange the payment there.",
+    aiutoInvio: "When you press the button, your order is registered, you get a summary email and WhatsApp opens with the message already written: press send and we'll arrange the payment there.",
     erroreGenerico: "We couldn't confirm your order. Please try again shortly.",
     errori: {
       obbligatorio: "Required",
@@ -684,11 +684,11 @@ const en: Testi = {
     },
     pronto: "Order confirmed",
     prontoTesto: (codice: string) =>
-      `Your order ${codice} is registered and we've sent you a summary email. Last step: send it to us on WhatsApp and we'll arrange the payment there.`,
+      `Your order ${codice} is registered and we've sent you a summary email. If WhatsApp didn't open by itself, press the button below and send the message: we'll arrange the payment there.`,
     prontoSenzaFoglio: "Last step",
     prontoTestoSenzaFoglio: (codice: string) =>
-      `Send order ${codice} on WhatsApp with the message already written: we'll arrange the payment there.`,
-    apriWhatsApp: "Send on WhatsApp",
+      `If WhatsApp didn't open by itself, press the button below and send the message for order ${codice}: we'll arrange the payment there.`,
+    apriWhatsApp: "Open WhatsApp",
     continua: "Keep browsing",
     copia: "Copy message",
     copiato: "Message copied",
